@@ -1,3 +1,4 @@
+import os
 import paho.mqtt.client as paho
 import json
 import datetime
@@ -55,7 +56,9 @@ class LiveObjects:
         self.__mqtt.on_connect = self.__onConnect
         self.__mqtt.on_message = self.__onMessage
         if self.__port == 8883:
-            self.__mqtt.tls_set("certfile.cer")
+            dirname = os.path.dirname(__file__)
+            filename = os.path.join(dirname, "./certfile.cer")
+            self.__mqtt.tls_set(filename)
         self.__mqtt.connect(self.__server, self.__port, 60)
         self.__mqtt.loop_start()
         time.sleep(1)
