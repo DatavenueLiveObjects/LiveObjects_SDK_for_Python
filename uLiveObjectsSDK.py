@@ -1,6 +1,7 @@
 from umqttsimple import *
 import json
 import time
+import ssl
 #from enum import Enum
 
 #class Type(Enum):
@@ -31,11 +32,12 @@ class LiveObjects:
         self.__payload = {self.__value: {}}
         self.__commands = {}
         self.__doLog = debug
-        self.__mqtt = MQTTClient(client_id=deviceID, server=self.__server, port=self.__port, user="json+device", password=self.__apiKey)
+        self.ssl = port == 8883
+        self.__mqtt = MQTTClient(deviceID, self.__server, self.__port,"json+device", self.__apiKey, 0 , self.ssl)
 
 
     def __onMessage(self, topic, msg):
-	if topic == b"dev/cfg/upd":
+        if topic == b"dev/cfg/upd":
             self.__parameterManager(msg)
         elif topic == b"dev/cmd":
             self.__commandManager(msg)
@@ -43,15 +45,15 @@ class LiveObjects:
     def __onConnect(self):
         self.outputDebug(INFO,"Connected, sending config")
         if len(self.__commands)>0:
-	    self.outputDebug(INFO,"Subscribing commands")
+            self.outputDebug(INFO,"Subscribing commands")
             self.__mqtt.subscribe(b"dev/cmd")
         if len(self.__parameters)>0:
-	    self.outputDebug(INFO,"Subscribing parameters")
+            self.outputDebug(INFO,"Subscribing parameters")
             self.__mqtt.subscribe(b"dev/cfg/upd")
             self.__sendConfig()
 
     def loop(self):
-	self.__mqtt.check_msg()
+        self.__mqtt.check_msg()
 
     def connect(self):
         #self.__mqtt.username_pw_set("json+device", self.__apiKey)
@@ -59,11 +61,11 @@ class LiveObjects:
         #self.__mqtt.on_message = self.__onMessage
         #if self.__port == 8883:
         #    self.__mqtt.tls_set("certfile.cer")
-	self.__mqtt.set_callback(self.__onMessage)
+        self.__mqtt.set_callback(self.__onMessage)
         self.__mqtt.connect()
         #self.__mqtt.loop_start()
         time.sleep(1)
-	self.__onConnect()
+        self.__onConnect()
 
 
     def outputDebug(self,info, *args):
