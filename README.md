@@ -9,7 +9,7 @@ This code wraps all the functions necessary to make your object work with Live O
 Code uses MQTT connection to exchange data with Live objects under the hood to keep your parameters up to date or execute the commands received without you having to take care of them (apart from writing the code of these commands, of course).
 
 ## Compatibility ##
-| Board | MQTT | MQTTS |
+| System | MQTT | MQTTS |
 | :--- | :---: | :---: |
 | Linux | OK |OK |
 | Windows | OK |OK |

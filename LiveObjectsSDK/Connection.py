@@ -109,6 +109,9 @@ class LiveObjects:
             time.sleep(1)
             self.__onConnect()
 
+    def disconnect(self):
+        self.__mqtt.disconnect()
+        self.outputDebug(INFO, "Disconnected")
 
     def outputDebug(self,info, *args):
         if self.__doLog:
