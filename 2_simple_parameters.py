@@ -2,13 +2,13 @@ import os
 import sys
 import time
 
-from LiveObjectsSDK.Connection import *
+import LiveObjects
 
-#Create LiveObjects with parameters:  ClientID - Port - APIKEY
-lo = LiveObjects("PythonMQTT", 1883, "<APIKEY>")
+#Create LiveObjects with parameters:  ClientID - Security - APIKEY
+lo = LiveObjects.Connection("PythonMQTT", LiveObjects.NONE, "<APIKEY>")
 
 #Main program
-lo.addParameter("messageRate", 5 , INT) #Add parameter: Name - Value - Type
+lo.addParameter("messageRate", 5 , LiveObjects.INT) #Add parameter: Name - Value - Type
 #Available types:  INT BINARY STRING FLOAT
 lo.connect() #Connect to LiveObjects
 last = time.time()

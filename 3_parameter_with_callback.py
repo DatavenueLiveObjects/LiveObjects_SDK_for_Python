@@ -2,11 +2,11 @@ import os
 import sys
 import time
 
-from LiveObjectsSDK.Connection import *
+import LiveObjects
 
 
-#Create LiveObjects with parameters:  ClientID - Port - APIKEY
-lo = LiveObjects("PythonMQTT", 1883, "<APIKEY>")
+#Create LiveObjects with parameters:  ClientID - Security - APIKEY
+lo = LiveObjects.Connection("PythonMQTT", LiveObjects.NONE, "<APIKEY>")
 
 #Callback for a parameter change
 def callback(parameterName, newValue):
@@ -14,7 +14,7 @@ def callback(parameterName, newValue):
 
 
 #Main program
-lo.addParameter("messageRate", 5 , INT, callback) #Add parameter: Name - Value - Type - Callback
+lo.addParameter("messageRate", 5 , LiveObjects.INT, callback) #Add parameter: Name - Value - Type - Callback
 #Available types:  INT BINARY STRING FLOAT
 lo.connect() #Connect to LiveObjects
 last = time.time()

@@ -1,17 +1,17 @@
 import os
 import sys
 import time
+import json
+import LiveObjects
 
-from LiveObjectsSDK.Connection import *
-
-#Create LiveObjects with parameters:  ClientID - Port - APIKEY
-lo = LiveObjects("PythonMQTT", 1883, "<APIKEY>")
+#Create LiveObjects with parameters:  ClientID - Security - APIKEY
+lo = LiveObjects.Connection("PythonMQTT", LiveObjects.NONE, "<APIKEY>")
 
 messageRate = 5
 
 #Define command function with arguments handling
 def foo(args={}):
-	lo.outputDebug(INFO,"Called function foo with args", json.dumps(args))
+	lo.outputDebug(LiveObjects.INFO,"Called function foo with args", json.dumps(args))
 	counter = 0
 	for i in range(args["repetitions"]):
 		print("Repetition nr "+str(i))

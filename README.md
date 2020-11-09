@@ -32,6 +32,26 @@ This code needs a few libraries to run
 
 ## Developer guide ##
 
+### Constructor ###
+
+Constructor of LiveObjects looks like this
+
+```Python
+lo = LiveObjects.Connection("mqttID",LiveObjects.NONE,"<APIKEY>", debug = True)
+```
+
+First parameter is ID of the device, second is type of connection security ( NONE / SSL), third is Api Key to LiveObjects and last is debug mode, if you don't want to output debug messages set it to False. You can also use `lo.setDebug(False)`.
+
+### Debug messages ###
+
+You can use LiveObjects to output debug messages.
+```Python
+foo = 21
+#INFO / ERROR / WARNING
+lo.outputDebug(LiveObjects.INFO,"example value", foo, ...)
+#Output: [INFO] example value 21 ...
+```
+
 ### Declare parameters ###
 You can update over the air some parameters of your sketch using Live Objects's parameters. Parameters and Commands must be declared **before** your device connects to Live Objects.
 
@@ -132,5 +152,6 @@ def foo():
      #Do some stuff
      #...
      lo.loop(); #Keep this in main loop
+  lo.disconnect()
 }
 ```

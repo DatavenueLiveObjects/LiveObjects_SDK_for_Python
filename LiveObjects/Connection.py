@@ -11,13 +11,16 @@ INFO="INFO"
 WARNING = "WARNING"
 ERROR = "ERROR"
 
+SSL = 8883
+NONE = 1883
+
 class LiveObjectsParameter:
     def __init__(self,value,type_, cb = None):
         self.value = value
         self.type = type_
         self.callback = cb
 
-class LiveObjects:
+class Connection:
     def __init__(self, deviceID, port, apiKey, debug = True):
         try: 
             if sys.platform == "linux" or sys.platform=="win32":
@@ -115,29 +118,9 @@ class LiveObjects:
 
     def outputDebug(self,info, *args):
         if self.__doLog:
-            # if self.mode == 1:
-            #     print("[", datetime.datetime.now().strftime("%d-%m-%Y %H:%M:%S"), "]", end="", sep="")
-            #     print("[",info,"]", end=" ", sep="")
-            #     for arg in args:
-            #         print(arg, end=" ")
-            #     print("")
-            # else:
             print("[", info, "]", end=" ", sep="")
             for arg in args:
                 print(arg, end=" ")
-            print("")
-    def __outputDebugS(self,info, *args):
-        if self.__doLog:
-            # if self.mode == 1:
-            #     print("[", datetime.datetime.now().strftime("%d-%m-%Y %H:%M:%S"), "]", end="", sep="")
-            #     print("[",info,"]", end=" ", sep="")
-            #     for arg in args:
-            #         print(arg, end="")
-            #     print("")
-            # else:
-            print("[", info, "]", end=" ", sep="")
-            for arg in args:
-                print(arg, end="")
             print("")
 
     def addCommand(self, name, cmd):
@@ -146,10 +129,10 @@ class LiveObjects:
     def __commandManager(self,msg):
         if self.mode ==1:
             msgDict = json.loads(msg.payload)
-            self.__outputDebugS(INFO, "Received message:\n", json.dumps(msgDict, sort_keys=True, indent=4))
+            self.outputDebug(INFO, "Received message:\n", json.dumps(msgDict, sort_keys=True, indent=4))
         else:
             msgDict = json.loads(msg)
-            self.__outputDebugS(INFO, "Received message:", json.dumps(msgDict))
+            self.outputDebug(INFO, "Received message:", json.dumps(msgDict))
         outputMsg = {}
         outputMsg["cid"] = msgDict["cid"]
         response = self.__commands.get(msgDict["req"], self.__default)(msgDict["arg"])
@@ -170,11 +153,11 @@ class LiveObjects:
     def __parameterManager(self, msg):
         if self.mode == 1:
             self.outputDebug(INFO,"Received message: ")
-            self.__outputDebugS(INFO,json.loads(msg.payload))
+            self.outputDebug(INFO,json.loads(msg.payload))
             params = json.loads(msg.payload)
         else:
             self.outputDebug(INFO, "Received message: ")
-            self.__outputDebugS(INFO, json.loads(msg))
+            self.outputDebug(INFO, json.loads(msg))
             params = json.loads(msg)
         for param in params["cfg"]:
             if params["cfg"][param]["t"] == "i32":
@@ -232,7 +215,7 @@ class LiveObjects:
     def __publishMessage(self, topic, msg):
         self.outputDebug(INFO, "Publishing message on topic: ", topic)
         if self.mode == 1:
-            self.__outputDebugS(INFO, "\n", json.dumps(msg, sort_keys=True, indent=4))
+            self.outputDebug(INFO, "\n", json.dumps(msg, sort_keys=True, indent=4))
         else:
-            self.__outputDebugS(INFO, json.dumps(msg))
+            self.outputDebug(INFO, json.dumps(msg))
         self.__mqtt.publish(topic, json.dumps(msg))

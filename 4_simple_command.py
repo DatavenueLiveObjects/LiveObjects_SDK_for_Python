@@ -2,16 +2,16 @@ import os
 import sys
 import time
 
-from LiveObjectsSDK.Connection import *
+import LiveObjects
 
-#Create LiveObjects with parameters:  ClientID - Port - APIKEY
-lo = LiveObjects("PythonMQTT", 1883, "<APIKEY>")
+#Create LiveObjects with parameters:  ClientID - Security - APIKEY
+lo = LiveObjects.Connection("PythonMQTT", LiveObjects.NONE, "<APIKEY>")
 
 messageRate = 5
 
 #Define command function
 def foo(arg={}):
-    lo.outputDebug(INFO,"Called function foo")
+    lo.outputDebug(LiveObjects.INFO,"Called function foo")
     return {}
 
 #Main program
