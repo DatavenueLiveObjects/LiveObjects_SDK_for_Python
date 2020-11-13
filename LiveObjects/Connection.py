@@ -204,6 +204,20 @@ class Connection:
 
     def addToPayload(self, name, val):
         self.__payload[self.__value][name] = val
+    
+    def setObjectAsPayload(self, val):
+        self.__payload[self.__value] = val
+
+    def addTag(self, tag):
+        if not "tags" in self.__payload:
+            self.__payload["tags"]=[]
+        self.__payload["tags"].append(tag)
+
+    def addTags(self, tags):
+        if not "tags" in self.__payload:
+            self.__payload["tags"]=[]
+        for tag in tags:
+            self.__payload["tags"].append(tag)
 
     def sendData(self):
         if self.quit:
