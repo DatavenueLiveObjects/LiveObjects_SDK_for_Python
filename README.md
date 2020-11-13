@@ -66,8 +66,8 @@ To retrieve a parameter use function `getParameter()` which takes following argu
 
 Example:
 ```Python
-lo.addParameter("messageRate", 25, INT);
-lo.addParameter("sendDHTData", true ,BINARY, myCallbackFunction);
+lo.addParameter("messageRate", 25, LiveObjects.INT);
+lo.addParameter("sendDHTData", true ,LiveObjects.BINARY, myCallbackFunction);
 ...
 if lo.getParameter("sendDHTData"):
     lo.addToPayload("temperature",DHT.readTemeprature())
@@ -153,5 +153,78 @@ def foo():
      #...
      lo.loop(); #Keep this in main loop
   lo.disconnect()
-}
 ```
+
+
+# Installation guide for uPython #
+
+## Requirements ##
+1. [ampy](https://learn.adafruit.com/micropython-basics-load-files-and-run-code/install-ampy)
+2. [umqttsimple, umqttrobust and ssl](https://github.com/micropython/micropython-lib)
+3. [PuTTY](https://www.putty.org/) (for Windows)
+
+## Installation steps ##
+1. Copy files into device
+  ```
+  ampy -pCOMXX put umqttrobus.py 
+  ampy -pCOMXX put umqttsimple.py 
+  ampy -pCOMXX put ssl.py 
+  ampy -pCOMXX put LiveObjects //It will copy directory with its content 
+  ```
+2. Prepare your sketch and save it as main.py then copy file into device
+```
+ampy -pCOMXX put main.py
+```
+3. Setup internet connection in boot.py file and upload it into device. Example for esp8266
+```Python
+# This file is executed on every boot (including wake-boot from deepsleep)
+#import esp
+#esp.osdebug(None)
+import uos, machine
+#uos.dupterm(None, 1) # disable REPL on UART(0)
+import gc
+#import webrepl
+#webrepl.start()
+gc.collect()
+
+
+#Network connection
+import network
+sta_if = network.WLAN(network.STA_IF)
+if not sta_if.isconnected():
+    print('connecting to network...')
+    sta_if.active(True)
+    sta_if.connect('SSID', 'PASS')
+    while not sta_if.isconnected():
+        pass
+print('network config:', sta_if.ifconfig())
+```
+You may want to get content of file first, then use 
+```
+ampy -pCOMXX get boot.py 
+```
+4. Connect to device and check if it's working using PuTTY
+    
+    Crtl + D soft resets device
+    
+    Ctrl + C Stops currently running script
+
+## Summary ##
+After all steps content of the device should look like this
+```
+>ampy -pCOMXX ls
+/LiveObjects
+/boot.py
+/main.py
+/ssl.py
+/umqttrobust.py
+/umqttsimple.py
+
+>ampy -pCOMXX ls LiveObjects
+/LiveObjects/Connection.py
+/LiveObjects/__init__.py
+/LiveObjects/certfile.cer
+```
+
+## Troubleshooting ##
+If you are getting 'MQTT exception: 5' check your api key
