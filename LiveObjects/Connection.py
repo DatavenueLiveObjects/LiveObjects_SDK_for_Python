@@ -208,6 +208,9 @@ class Connection:
     def setObjectAsPayload(self, val):
         self.__payload[self.__value] = val
 
+    def addModel(self, model):
+        self.__payload["model"] = model
+
     def addTag(self, tag):
         if not "tags" in self.__payload:
             self.__payload["tags"]=[]
