@@ -138,6 +138,20 @@ def foo():
 
 As soon the data is send, your payload is cleared and waiting for the next sending.
 
+### Advanced payload feautres ###
+```Python
+  #add "model" property to your message
+  lo.addModel("exampleName")
+
+  #Add "tag" property to your message
+  lo.addTag("kitchen")
+  lo.addTags(["humidity","bathroom"])
+
+  #Use your object as payload (this function doesn't append current paylod)
+  obj = ["example":"value", "example2":"value2" ]
+  lo.setObjectAsPayload(obj)
+```
+
 
 ### Connect, disconnect and loop ###
 You can control the connection and disconnection of your device using `connect()` and `disconnect()`.
@@ -157,7 +171,7 @@ def foo():
 
 
 # Installation guide for uPython #
-
+## Example for ESP8266 ##
 ## Requirements ##
 1. [ampy](https://learn.adafruit.com/micropython-basics-load-files-and-run-code/install-ampy)
 2. [umqttsimple, umqttrobust and ssl](https://github.com/micropython/micropython-lib)
@@ -175,7 +189,7 @@ def foo():
 ```
 ampy -pCOMXX put main.py
 ```
-3. Setup internet connection in boot.py file and upload it into device. Example for esp8266
+3. Setup internet connection in boot.py file and upload it into device.
 ```Python
 # This file is executed on every boot (including wake-boot from deepsleep)
 #import esp

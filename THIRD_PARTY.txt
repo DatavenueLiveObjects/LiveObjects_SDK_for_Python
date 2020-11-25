@@ -1,0 +1,4 @@
+COMPONENT                               | VERSION          | LICENCE                    | URL
+-------------------------------------------------------------------------------------------------------------------------------------------------
+Paho-mqtt                               | Latest           | BSD + EPL/EDL              | https://github.com/eclipse/paho.mqtt.python/blob/master/LICENSE.txt
+simple, robust, ssl micropython modules | Latest           | MIT License                | https://github.com/micropython/micropython-lib/blob/master/LICENSE
