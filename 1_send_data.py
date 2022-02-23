@@ -4,17 +4,16 @@
 # This software is distributed under the terms and conditions of the 'MIT'
 # license which can be found in the file 'LICENSE.md' in this package distribution
 
-import os
-import sys
 import time
 
 import LiveObjects
 
 
 b = LiveObjects.BoardsFactory()
-c = b.board.get_lo_id()
+lo_id = LiveObjects.Credentials().get_lo_id()
+
 #Create LiveObjects with parameters:  ClientID - Security - APIKEY
-lo = LiveObjects.Connection("PythonMQTT", LiveObjects.SSL, "")
+lo = LiveObjects.Connection("PythonMQTT", LiveObjects.SSL, lo_id)
 
 messageRate = 5
 

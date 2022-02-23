@@ -60,7 +60,7 @@ class Linux(BoardsInterface):
 class BoardsFactory:
 
     def __new__(cls):
-        sn = os.uname().sysname
-        sn_u = sn[0].upper() + sn[1:]   # first letter upper
-        board = eval(sn_u)()            # instance of board
+        s = os.uname().sysname
+        sn = s[0].upper() + s[1:]   # capitalize first letter
+        board = eval(sn)()          # instance of board
         return board
