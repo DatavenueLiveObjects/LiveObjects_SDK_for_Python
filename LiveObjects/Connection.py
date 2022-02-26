@@ -27,7 +27,7 @@ class LiveObjectsParameter:
         self.callback = cb
 
 class Connection:
-    def __init__(self, deviceID, port, apiKey, debug = True):
+    def __init__(self, board, deviceID, port, apiKey, debug = True):
         try: 
             if sys.platform == "linux" or sys.platform=="win32":
                 import paho.mqtt.client as paho
