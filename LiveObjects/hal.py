@@ -7,8 +7,20 @@
 import os
 import time
 
+import LiveObjects
+
 
 class BoardsInterface:
+
+    @staticmethod
+    def create_credentials(mode):
+        return LiveObjects.Credentials(mode)
+
+    def get_apikey(self):
+        return self._credentials.get_apikey()
+
+    def get_client_id(self):
+        return self._lang + 'MQTT'
 
     def mqtt_lib_import_str(self, lang):
         # https://stackoverflow.com/questions/8718885/import-module-from-string-variable
@@ -18,7 +30,10 @@ class BoardsInterface:
         }
         return import_strings[lang]
 
-    def network_connect(self, creds):
+    def get_security_level(self):
+        return LiveObjects.SSL if self._wifi_tls_capability else LiveObjects.NONE
+
+    def network_connect(self):
         pass
 
     def network_disconnect(self):
@@ -33,10 +48,10 @@ class GPy(BoardsInterface):
     def __init__(self):
         self._lang = 'microPython'
         self._wifi_tls_capability = True
-        self._mobile_tls_capability = True
+        self._lte_tls_capability = True
         self._mqtt_lib = super().mqtt_lib_import_str(self._lang)
 
-    def network_connect(self, creds):
+    def network_connect(self):
         pass
 
 
@@ -44,10 +59,12 @@ class Esp8266(BoardsInterface):
     def __init__(self):
         self._lang = 'microPython'
         self._wifi_tls_capability = False
+        self._wifi_lte_capability = False
         self._mqtt_lib = super().mqtt_lib_import_str(self._lang)
+        self._credentials = super().create_credentials(LiveObjects.Credentials.WIFI)
 
-    def network_connect(self, creds):
-        pass
+    def network_connect(self):
+        wifi_connect(self._credentials.get_wifi_creds()['ssid'], self._credentials.get_wifi_creds()['password'])
 
 
 class Win32(BoardsInterface):
@@ -58,19 +75,23 @@ class Esp32(BoardsInterface):
     def __init__(self):
         self._lang = 'microPython'
         self._wifi_tls_capability = True
+        self._wifi_lte_capability = False
         self._mqtt_lib = super().mqtt_lib_import_str(self._lang)
+        self._credentials = super().create_credentials(LiveObjects.Credentials.WIFI)
 
-    def network_connect(self, creds):
-        wifi_connect(creds)
+    def network_connect(self):
+        wifi_connect(self._credentials.get_wifi_creds()['ssid'], self._credentials.get_wifi_creds()['password'])
 
 
 class Linux(BoardsInterface):
     def __init__(self):
         self._lang = 'Python'
         self._wifi_tls_capability = True
+        self._wifi_lte_capability = False
         self._mqtt_lib = super().mqtt_lib_import_str(self._lang)
+        self._credentials = super().create_credentials(LiveObjects.Credentials.NONE)
 
-    def network_connect(self, creds):
+    def network_connect(self):
         use_existing_network_connection()
 
 
@@ -87,18 +108,17 @@ def use_existing_network_connection():
     print('Using existing network connection')
 
 
-def wifi_connect(creds):
+def wifi_connect(ssid, password):
     import network
 
-    creds = {'ssid': 'EdekAD57BA', 'pass': 'JANECZEK2000'}
-    print('444444444444444444444444444')
     sta_if = network.WLAN(network.STA_IF)
-    if not sta_if.isconnected():
+    sta_if.active(True)
+    while not sta_if.isconnected():
         print('connecting to network...')
-        sta_if.active(True)
-        sta_if.connect(creds['ssid'], creds['pass'])
-        while not sta_if.isconnected():
-            pass
+        sta_if.connect(ssid, password)
+        if sta_if.isconnected():
+            break
+        time.sleep(2)
     print('network config:', sta_if.ifconfig())
 
     # # ------------------ PyCom --------------------------

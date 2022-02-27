@@ -7,12 +7,14 @@
 import time
 import LiveObjects
 
-creds = LiveObjects.Credentials()
 board = LiveObjects.BoardsFactory()
 
-apikey = creds.get_apikey()
+apikey = board.get_apikey()
+client_id = board.get_client_id()
+security_level = board.get_security_level()
+
 # Create LiveObjects with parameters:  Board - ClientID - Security - APIKEY
-lo = LiveObjects.Connection(board, "PythonMQTT", LiveObjects.SSL, apikey)
+lo = LiveObjects.Connection(board, client_id, security_level, apikey)
 
 messageRate = 5
 
