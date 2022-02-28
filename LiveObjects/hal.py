@@ -50,9 +50,10 @@ class GPy(BoardsInterface):
         self._wifi_tls_capability = True
         self._lte_tls_capability = True
         self._mqtt_lib = super().mqtt_lib_import_str(self._lang)
+        self._credentials = super().create_credentials(LiveObjects.Credentials.WIFI)
 
     def network_connect(self):
-        pass
+        pycom_wifi_connect(self._credentials.get_wifi_creds()['ssid'], self._credentials.get_wifi_creds()['password'])
 
 
 class Esp8266(BoardsInterface):
@@ -114,14 +115,36 @@ def wifi_connect(ssid, password):
     sta_if = network.WLAN(network.STA_IF)
     sta_if.active(True)
     while not sta_if.isconnected():
-        print('connecting to network...')
+        print('Connecting to network...')
         sta_if.connect(ssid, password)
         if sta_if.isconnected():
             break
         time.sleep(2)
-    print('network config:', sta_if.ifconfig())
+    print('Network config:', sta_if.ifconfig())
 
-    
+
+CONN_TIMEOUT = 20
+
+
+def pycom_wifi_connect(ssid, password):
+    from network import WLAN
+
+    wlan = WLAN(mode=WLAN.STA)
+    wlan.hostname('xPy_1')
+    start_time = time.time()
+    while 1:
+        print("Trying to connect...")
+        wlan.connect(ssid=ssid, auth=(WLAN.WPA2, password))
+        time.sleep_ms(3000)
+        if wlan.isconnected():
+            print("WiFi connected succesfully")
+            print('IPs:', wlan.ifconfig(), 'Channel:', wlan.channel())
+            break
+        elif time.time() - start_time > CONN_TIMEOUT:
+            print("WiFi not connected. Stopped.")
+            break
+
+
 def mobile_connect(pin):
     # noinspection PyUnresolvedReferences
     from network import LTE
