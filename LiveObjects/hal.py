@@ -121,24 +121,7 @@ def wifi_connect(ssid, password):
         time.sleep(2)
     print('network config:', sta_if.ifconfig())
 
-    # # ------------------ PyCom --------------------------
-    # def pycomConn(self):
-    #     wlan = WLAN(mode=WLAN.STA)#, bandwidth=WLAN.HT20)
-    #     wlan.hostname('xPy_1')
-    #     startTime = time.time()
-    #     while 1:
-    #         print("Trying to connect...")
-    #         wlan.connect(ssid='EdekAD57BA', auth=(WLAN.WPA2, 'JANECZEK2000'))
-    #         time.sleep_ms(3000)
-    #         if wlan.isconnected():
-    #             print("WiFi connected succesfully")
-    #             print('IPs:', wlan.ifconfig(), 'Channel:', wlan.channel())
-    #             break
-    #         elif time.time() - startTime > CONN_TIMEOUT:
-    #             print("WiFi not connected. Stopped.")
-    #             break
-
-
+    
 def mobile_connect(pin):
     # noinspection PyUnresolvedReferences
     from network import LTE
