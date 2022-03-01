@@ -22,8 +22,8 @@ class BoardsInterface:
     def get_client_id(self):
         return self._lang + 'MQTT'
 
-    def mqtt_lib_import_str(self, lang):
-        # https://stackoverflow.com/questions/8718885/import-module-from-string-variable
+    @staticmethod
+    def mqtt_lib_import_str(lang):
         import_strings = {
             'microPython': 'from umqttrobust import MQTTClient',
             'Python': 'import paho.mqtt.client as paho'
@@ -145,14 +145,14 @@ def pycom_wifi_connect(ssid, password):
             break
 
 
-def mobile_connect(pin):
-    # noinspection PyUnresolvedReferences
+def lte_connect(pin):
+
     from network import LTE
     import socket
 
     lte = LTE()
     time.sleep(2)
-    print("PIN", (lte.send_at_cmd(f'AT+CPIN="{pin}"')).strip())
+    print("PIN", (lte.send_at_cmd('AT+CPIN="%s"' % pin)).strip())
 
     lte.attach()
     print("attaching... ", end='')
