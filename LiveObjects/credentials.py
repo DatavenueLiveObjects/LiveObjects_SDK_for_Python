@@ -25,4 +25,4 @@ class Credentials:
         return {'ssid': self._wifi_ssid, 'password': self._wifi_password}
 
     def get_lte_creds(self):
-        return self._pin, self._apn
+        return {'pin': self._pin, 'apn_name': self._apn}
