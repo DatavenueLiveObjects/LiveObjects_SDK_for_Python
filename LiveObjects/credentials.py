@@ -3,19 +3,18 @@
 #
 # This software is distributed under the terms and conditions of the 'MIT'
 # license which can be found in the file 'LICENSE.md' in this package distribution
+import LiveObjects
+
+
 class Credentials:
 
-    NONE = 1
-    WIFI = 2
-    LTE = 3
-
-    def __init__(self, net_type=NONE):
+    def __init__(self, net_type):
         self._apikey = <APIKEY>
 
-        if net_type == Credentials.WIFI:
+        if net_type == LiveObjects.BoardsInterface.WIFI:
             self._wifi_ssid = <WIFI_SSID>
             self._wifi_password = <WIFI PASS>
-        elif net_type == Credentials.LTE:
+        elif net_type == LiveObjects.BoardsInterface.LTE:
             self._pin = <PIN>
             self._apn = <APN_NAME>
 

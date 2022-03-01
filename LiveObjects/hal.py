@@ -12,6 +12,10 @@ import LiveObjects
 
 class BoardsInterface:
 
+    EXISTING = 1
+    WIFI = 2
+    LTE = 3
+
     @staticmethod
     def create_credentials(mode):
         return LiveObjects.Credentials(mode)
@@ -50,7 +54,7 @@ class GPy(BoardsInterface):
         self._wifi_tls_capability = True
         self._lte_tls_capability = True
         self._mqtt_lib = super().mqtt_lib_import_str(self._lang)
-        self._credentials = super().create_credentials(LiveObjects.Credentials.WIFI)
+        self._credentials = super().create_credentials(BoardsInterface.WIFI)
 
     def network_connect(self):
         pycom_wifi_connect(self._credentials.get_wifi_creds()['ssid'], self._credentials.get_wifi_creds()['password'])
@@ -62,7 +66,7 @@ class Esp8266(BoardsInterface):
         self._wifi_tls_capability = False
         self._wifi_lte_capability = False
         self._mqtt_lib = super().mqtt_lib_import_str(self._lang)
-        self._credentials = super().create_credentials(LiveObjects.Credentials.WIFI)
+        self._credentials = super().create_credentials(BoardsInterface.WIFI)
 
     def network_connect(self):
         wifi_connect(self._credentials.get_wifi_creds()['ssid'], self._credentials.get_wifi_creds()['password'])
@@ -78,7 +82,7 @@ class Esp32(BoardsInterface):
         self._wifi_tls_capability = True
         self._wifi_lte_capability = False
         self._mqtt_lib = super().mqtt_lib_import_str(self._lang)
-        self._credentials = super().create_credentials(LiveObjects.Credentials.WIFI)
+        self._credentials = super().create_credentials(BoardsInterface.WIFI)
 
     def network_connect(self):
         wifi_connect(self._credentials.get_wifi_creds()['ssid'], self._credentials.get_wifi_creds()['password'])
@@ -90,7 +94,7 @@ class Linux(BoardsInterface):
         self._wifi_tls_capability = True
         self._wifi_lte_capability = False
         self._mqtt_lib = super().mqtt_lib_import_str(self._lang)
-        self._credentials = super().create_credentials(LiveObjects.Credentials.NONE)
+        self._credentials = super().create_credentials(BoardsInterface.EXISTING)
 
     def network_connect(self):
         use_existing_network_connection()
