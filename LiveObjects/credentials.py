@@ -10,14 +10,14 @@ class Credentials:
     LTE = 3
 
     def __init__(self, net_type=NONE):
-        self._apikey = <APIKEY>
+        self._apikey = '0ce12ecdd74343bd9360b63888033de0'
 
         if net_type == Credentials.WIFI:
-            self._wifi_ssid = <WIFI_SSID>
-            self._wifi_password = <WIFI PASS>
+            self._wifi_ssid = 'EdekAD57BA'
+            self._wifi_password = 'JANECZEK2000'
         elif net_type == Credentials.LTE:
-            self._pin = <PIN>
-            self._apn = <APN_NAME>
+            self._pin = '1155'
+            self._apn = 'internet'
 
     def get_apikey(self):
         return self._apikey
