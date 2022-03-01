@@ -9,11 +9,13 @@ import LiveObjects
 class Credentials:
 
     def __init__(self, net_type):
+
         self._apikey = <APIKEY>
+        self._net_type = net_type
 
         if net_type == LiveObjects.BoardsInterface.WIFI:
             self._wifi_ssid = <WIFI_SSID>
-            self._wifi_password = <WIFI PASS>
+            self._wifi_password = <WIFI_PASS>
         elif net_type == LiveObjects.BoardsInterface.LTE:
             self._pin = <PIN>
             self._apn = <APN_NAME>
@@ -21,8 +23,8 @@ class Credentials:
     def get_apikey(self):
         return self._apikey
 
-    def get_wifi_creds(self):
-        return {'ssid': self._wifi_ssid, 'password': self._wifi_password}
-
-    def get_lte_creds(self):
-        return {'pin': self._pin, 'apn_name': self._apn}
+    def get_creds(self):
+        if self._net_type == LiveObjects.BoardsInterface.WIFI:
+            return {'ssid': self._wifi_ssid, 'password': self._wifi_password}
+        elif self._net_type == LiveObjects.BoardsInterface.LTE:
+            return {'pin': self._pin, 'apn_name': self._apn}

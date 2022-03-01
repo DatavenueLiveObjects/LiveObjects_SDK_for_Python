@@ -7,7 +7,7 @@
 import time
 import LiveObjects
 
-board = LiveObjects.BoardsFactory()
+board = LiveObjects.BoardsFactory(net_type=LiveObjects.BoardsInterface.WIFI)
 
 apikey = board.get_apikey()
 client_id = board.get_client_id()
@@ -16,7 +16,7 @@ security_level = board.get_security_level()
 # Create LiveObjects with parameters:  Board - ClientID - Security - APIKEY
 lo = LiveObjects.Connection(board, client_id, security_level, apikey)
 
-messageRate = 5
+MESSAGE_RATE = 5
 
 # Main program
 board.network_connect()
@@ -25,7 +25,7 @@ last = time.time()
 uptime = time.time()
 
 while True:
-	if time.time() >= last+messageRate:
+	if time.time() >= last + MESSAGE_RATE:
 		lo.addToPayload("uptime", int(time.time() - uptime))		# Add value to payload: name - value
 		lo.sendData()												# Sending data to cloud
 		lo.loop() 						# Check for incoming messages and if connection is still active

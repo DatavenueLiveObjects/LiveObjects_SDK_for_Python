@@ -12,13 +12,13 @@ import LiveObjects
 
 class BoardsInterface:
 
-    EXISTING = 1
-    WIFI = 2
-    LTE = 3
+    EXISTING_NETWORK = 2
+    WIFI = 3
+    LTE = 4
 
     @staticmethod
-    def create_credentials(mode):
-        return LiveObjects.Credentials(mode)
+    def create_credentials(net_type):
+        return LiveObjects.Credentials(net_type)
 
     def get_apikey(self):
         return self._credentials.get_apikey()
@@ -35,7 +35,7 @@ class BoardsInterface:
         return import_strings[lang]
 
     def get_security_level(self):
-        return LiveObjects.SSL if self._wifi_tls_capability else LiveObjects.NONE
+        pass
 
     def network_connect(self):
         pass
@@ -49,27 +49,43 @@ class LoPy(BoardsInterface):
 
 
 class GPy(BoardsInterface):
-    def __init__(self):
+    def __init__(self, net_type):
         self._lang = 'microPython'
+        self._net_type = net_type
         self._wifi_tls_capability = True
-        self._lte_tls_capability = True
+        self._lte_tls_capability = False
         self._mqtt_lib = super().mqtt_lib_import_str(self._lang)
-        self._credentials = super().create_credentials(BoardsInterface.WIFI)
+        self._credentials = super().create_credentials(net_type)
 
     def network_connect(self):
-        pycom_wifi_connect(self._credentials.get_wifi_creds()['ssid'], self._credentials.get_wifi_creds()['password'])
+        if self._net_type == BoardsInterface.WIFI:
+            pycom_wifi_connect(self._credentials.get_creds()['ssid'], self._credentials.get_creds()['password'])
+        elif self._net_type == BoardsInterface.LTE:
+            lte_connect(self._credentials.get_creds()['pin'])
+
+    def get_security_level(self):
+        if self._net_type == BoardsInterface.WIFI:
+            return LiveObjects.SSL if self._wifi_tls_capability else LiveObjects.NONE
+        elif self._net_type == BoardsInterface.LTE:
+            return LiveObjects.SSL if self._lte_tls_capability else LiveObjects.NONE
 
 
 class Esp8266(BoardsInterface):
-    def __init__(self):
+    def __init__(self, net_type):
         self._lang = 'microPython'
+        self._net_type = net_type
         self._wifi_tls_capability = False
         self._wifi_lte_capability = False
         self._mqtt_lib = super().mqtt_lib_import_str(self._lang)
         self._credentials = super().create_credentials(BoardsInterface.WIFI)
 
     def network_connect(self):
-        wifi_connect(self._credentials.get_wifi_creds()['ssid'], self._credentials.get_wifi_creds()['password'])
+        if self._net_type == BoardsInterface.WIFI:
+            wifi_connect(self._credentials.get_creds()['ssid'], self._credentials.get_creds()['password'])
+
+    def get_security_level(self):
+        if self._net_type == BoardsInterface.WIFI:
+            return LiveObjects.SSL if self._wifi_tls_capability else LiveObjects.NONE
 
 
 class Win32(BoardsInterface):
@@ -77,35 +93,47 @@ class Win32(BoardsInterface):
 
 
 class Esp32(BoardsInterface):
-    def __init__(self):
+    def __init__(self, net_type):
         self._lang = 'microPython'
+        self._net_type = net_type
         self._wifi_tls_capability = True
         self._wifi_lte_capability = False
         self._mqtt_lib = super().mqtt_lib_import_str(self._lang)
         self._credentials = super().create_credentials(BoardsInterface.WIFI)
 
     def network_connect(self):
-        wifi_connect(self._credentials.get_wifi_creds()['ssid'], self._credentials.get_wifi_creds()['password'])
+        if self._net_type == BoardsInterface.WIFI:
+            wifi_connect(self._credentials.get_creds()['ssid'], self._credentials.get_creds()['password'])
+
+    def get_security_level(self):
+        if self._net_type == BoardsInterface.WIFI:
+            return LiveObjects.SSL if self._wifi_tls_capability else LiveObjects.NONE
 
 
 class Linux(BoardsInterface):
-    def __init__(self):
+    def __init__(self, net_type):
         self._lang = 'Python'
+        self._net_type = net_type
         self._wifi_tls_capability = True
         self._wifi_lte_capability = False
         self._mqtt_lib = super().mqtt_lib_import_str(self._lang)
-        self._credentials = super().create_credentials(BoardsInterface.EXISTING)
+        self._credentials = super().create_credentials(self._net_type)
 
     def network_connect(self):
-        use_existing_network_connection()
+        if self._net_type == BoardsInterface.EXISTING_NETWORK:
+            use_existing_network_connection()
+
+    def get_security_level(self):
+        if self._net_type == BoardsInterface.EXISTING_NETWORK:
+            return LiveObjects.SSL if self._wifi_tls_capability else LiveObjects.NONE
 
 
 class BoardsFactory:
 
-    def __new__(cls):
+    def __new__(cls, net_type):
         s = os.uname().sysname
         sn = s[0].upper() + s[1:]  # capitalize first letter
-        board = eval(sn)()  # instance of board
+        board = eval(sn)(net_type)  # instance of board w/ net type: WiFi, LTE, etc.
         return board
 
 
@@ -130,6 +158,7 @@ def wifi_connect(ssid, password):
 CONN_TIMEOUT = 20
 
 
+# noinspection PyUnresolvedReferences
 def pycom_wifi_connect(ssid, password):
     from network import WLAN
 
@@ -149,10 +178,10 @@ def pycom_wifi_connect(ssid, password):
             break
 
 
+# noinspection PyUnresolvedReferences
 def lte_connect(pin):
 
     from network import LTE
-    import socket
 
     lte = LTE()
     time.sleep(2)
