@@ -7,7 +7,7 @@
 import time
 import LiveObjects
 
-board = LiveObjects.BoardsFactory(net_type=LiveObjects.BoardsInterface.WIFI)
+board = LiveObjects.BoardsFactory(net_type=LiveObjects.BoardsInterface.DEFAULT_CARRIER)
 
 apikey = board.get_apikey()
 client_id = board.get_client_id()

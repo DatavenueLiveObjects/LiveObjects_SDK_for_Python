@@ -12,6 +12,7 @@ import LiveObjects
 
 class BoardsInterface:
 
+    DEFAULT_CARRIER = 1
     EXISTING_NETWORK = 2
     WIFI = 3
     LTE = 4
@@ -51,11 +52,11 @@ class LoPy(BoardsInterface):
 class GPy(BoardsInterface):
     def __init__(self, net_type):
         self._lang = 'microPython'
-        self._net_type = net_type
+        self._net_type = BoardsInterface.WIFI if net_type == BoardsInterface.DEFAULT_CARRIER else net_type
         self._wifi_tls_capability = True
         self._lte_tls_capability = False
         self._mqtt_lib = super().mqtt_lib_import_str(self._lang)
-        self._credentials = super().create_credentials(net_type)
+        self._credentials = super().create_credentials(self._net_type)
 
     def network_connect(self):
         if self._net_type == BoardsInterface.WIFI:
@@ -73,7 +74,7 @@ class GPy(BoardsInterface):
 class Esp8266(BoardsInterface):
     def __init__(self, net_type):
         self._lang = 'microPython'
-        self._net_type = net_type
+        self._net_type = BoardsInterface.WIFI if net_type == BoardsInterface.DEFAULT_CARRIER else None
         self._wifi_tls_capability = False
         self._wifi_lte_capability = False
         self._mqtt_lib = super().mqtt_lib_import_str(self._lang)
@@ -95,7 +96,7 @@ class Win32(BoardsInterface):
 class Esp32(BoardsInterface):
     def __init__(self, net_type):
         self._lang = 'microPython'
-        self._net_type = net_type
+        self._net_type = BoardsInterface.WIFI if net_type == BoardsInterface.DEFAULT_CARRIER else None
         self._wifi_tls_capability = True
         self._wifi_lte_capability = False
         self._mqtt_lib = super().mqtt_lib_import_str(self._lang)
@@ -113,7 +114,7 @@ class Esp32(BoardsInterface):
 class Linux(BoardsInterface):
     def __init__(self, net_type):
         self._lang = 'Python'
-        self._net_type = net_type
+        self._net_type = BoardsInterface.EXISTING_NETWORK if net_type == BoardsInterface.DEFAULT_CARRIER else None
         self._wifi_tls_capability = True
         self._wifi_lte_capability = False
         self._mqtt_lib = super().mqtt_lib_import_str(self._lang)
