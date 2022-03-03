@@ -61,7 +61,7 @@ class GPy(BoardsInterface):
         self._net_type = BoardsInterface.WIFI if net_type == BoardsInterface.DEFAULT_CARRIER else net_type
         self._carrier_capability = (BoardsInterface.WIFI, BoardsInterface.LTE)
         self._wifi_tls_capability = True
-        self._lte_tls_capability = False
+        self._lte_tls_capability = True
         self._mqtt_lib = super().mqtt_lib_import_str(self._lang)
         self._credentials = super().create_credentials(self._net_type)
 
@@ -122,7 +122,7 @@ class Linux(BoardsInterface):
         self._lang = 'Python'
         self._net_type = BoardsInterface.EXISTING_NETWORK if net_type == BoardsInterface.DEFAULT_CARRIER else net_type
         self._carrier_capability = (BoardsInterface.EXISTING_NETWORK,)
-        self._wifi_tls_capability = True
+        self._existing_network_tls_capability = True
         self._mqtt_lib = super().mqtt_lib_import_str(self._lang)
         self._credentials = super().create_credentials(self._net_type)
 
@@ -131,7 +131,7 @@ class Linux(BoardsInterface):
         use_existing_network_connection()
 
     def get_security_level(self):
-        return LiveObjects.SSL if self._wifi_tls_capability else LiveObjects.NONE
+        return LiveObjects.SSL if self._existing_network_tls_capability else LiveObjects.NONE
 
 
 class BoardsFactory:
@@ -187,9 +187,19 @@ def lte_connect(pin):
 
     from network import LTE
 
+    def is_waiting_for_pin():
+        if lte.send_at_cmd('AT+CPIN?').strip() == '+CPIN: SIM PIN\r\n\r\nOK':
+            return True
+        else:
+            return False
+
     lte = LTE()
     time.sleep(2)
-    print("PIN", (lte.send_at_cmd('AT+CPIN="%s"' % pin)).strip())
+
+    if is_waiting_for_pin():
+        print("PIN", (lte.send_at_cmd('AT+CPIN="%s"' % pin)).strip())
+    else:
+        print("PIN READY")
 
     lte.attach()
     print("attaching... ", end='')
