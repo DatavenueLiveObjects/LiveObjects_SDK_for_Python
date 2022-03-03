@@ -85,7 +85,6 @@ class Esp8266(BoardsInterface):
         self._net_type = BoardsInterface.WIFI if net_type == BoardsInterface.DEFAULT_CARRIER else net_type
         self._carrier_capability = (BoardsInterface.WIFI,)
         self._wifi_tls_capability = False
-        self._wifi_lte_capability = False
         self._mqtt_lib = super().mqtt_lib_import_str(self._lang)
         self._credentials = super().create_credentials(self._net_type)
 
@@ -107,7 +106,6 @@ class Esp32(BoardsInterface):
         self._net_type = BoardsInterface.WIFI if net_type == BoardsInterface.DEFAULT_CARRIER else net_type
         self._carrier_capability = (BoardsInterface.WIFI,)
         self._wifi_tls_capability = True
-        self._wifi_lte_capability = False
         self._mqtt_lib = super().mqtt_lib_import_str(self._lang)
         self._credentials = super().create_credentials(self._net_type)
 
@@ -125,7 +123,6 @@ class Linux(BoardsInterface):
         self._net_type = BoardsInterface.EXISTING_NETWORK if net_type == BoardsInterface.DEFAULT_CARRIER else net_type
         self._carrier_capability = (BoardsInterface.EXISTING_NETWORK,)
         self._wifi_tls_capability = True
-        self._wifi_lte_capability = False
         self._mqtt_lib = super().mqtt_lib_import_str(self._lang)
         self._credentials = super().create_credentials(self._net_type)
 
