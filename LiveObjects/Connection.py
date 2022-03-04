@@ -8,23 +8,25 @@ import sys
 import json
 import time
 import os
-INT="i32"
-UINT="u32"
-BINARY="bin"
-STRING="str"
-FLOAT="f64"
-INFO="INFO"
+INT = "i32"
+UINT = "u32"
+BINARY = "bin"
+STRING = "str"
+FLOAT = "f64"
+INFO = "INFO"
 WARNING = "WARNING"
 ERROR = "ERROR"
 
 SSL = 8883
 NONE = 1883
 
+
 class LiveObjectsParameter:
-    def __init__(self,value,type_, cb = None):
+    def __init__(self, value, type_, cb=None):
         self.value = value
         self.type = type_
         self.callback = cb
+
 
 class Connection:
     def __init__(self, board, deviceID, port, apiKey, debug = True):
@@ -48,7 +50,7 @@ class Connection:
         self.__payload = {self.__value: {}}
         self.__commands = {}
         self.__doLog = debug
-        self.quit=False
+        self.quit = False
 
         if self.mode == 1:
             self.__mqtt = paho.Client(deviceID)
@@ -60,7 +62,7 @@ class Connection:
         if self.mode == 0:
             self.__mqtt.check_msg()
 
-    def __onMessage(self,client="", userdata="", msg=""):
+    def __onMessage(self, client="", userdata="", msg=""):
         if self.mode == 1:
             if msg.topic == "dev/cfg/upd":
                 self.__parameterManager(msg)
@@ -72,14 +74,14 @@ class Connection:
             elif client == b"dev/cmd":
                 self.__commandManager(userdata)
 
-    def __onConnect(self,client="", userdata="", flags="", rc=""):
+    def __onConnect(self, client="", userdata="", flags="", rc=""):
         if self.mode == 1:
-            if rc ==0:
-                self.outputDebug(INFO,"Connected!")
-                if len(self.__commands)>0:
+            if rc == 0:
+                self.outputDebug(INFO, "Connected!")
+                if len(self.__commands) > 0:
                     self.outputDebug(INFO, "Subscribing commands")
                     self.__mqtt.subscribe("dev/cmd")
-                if len(self.__parameters)>0:
+                if len(self.__parameters) > 0:
                     self.outputDebug(INFO, "Subscribing parameters")
                     self.__mqtt.subscribe("dev/cfg/upd")
                     self.__sendConfig()
@@ -107,8 +109,6 @@ class Connection:
             self.__mqtt.on_connect = self.__onConnect
             self.__mqtt.on_message = self.__onMessage
             if self.__port == 8883:
-                # dirname = os.path.dirname(__file__)
-                # filename = os.path.join(dirname, "./certfile.cer")
                 filename = "/etc/ssl/certs/ca-certificates.crt"
                 self.__mqtt.tls_set(filename)
             self.__mqtt.connect(self.__server, self.__port, 60)
@@ -133,8 +133,8 @@ class Connection:
     def addCommand(self, name, cmd):
         self.__commands[name] = cmd
 
-    def __commandManager(self,msg):
-        if self.mode ==1:
+    def __commandManager(self, msg):
+        if self.mode == 1:
             msgDict = json.loads(msg.payload)
             self.outputDebug(INFO, "Received message:\n", json.dumps(msgDict, sort_keys=True, indent=4))
         else:
@@ -149,18 +149,18 @@ class Connection:
 
     def __default(self, req=""):
         self.outputDebug(INFO, "Command not found!")
-        return {"info" : "Command not found"}
+        return {"info": "Command not found"}
 
     def __sendConfig(self):
-        outMsg={ "cfg" : {} }
+        outMsg = { "cfg" : {} }
         for param in self.__parameters:
-            outMsg["cfg"][param]={ "t" : self.__parameters[param].type, "v" : self.__parameters[param].value }
-        self.__publishMessage("dev/cfg",outMsg)
+            outMsg["cfg"][param] = {"t": self.__parameters[param].type, "v": self.__parameters[param].value}
+        self.__publishMessage("dev/cfg", outMsg)
 
     def __parameterManager(self, msg):
         if self.mode == 1:
-            self.outputDebug(INFO,"Received message: ")
-            self.outputDebug(INFO,json.loads(msg.payload))
+            self.outputDebug(INFO, "Received message: ")
+            self.outputDebug(INFO, json.loads(msg.payload))
             params = json.loads(msg.payload)
         else:
             self.outputDebug(INFO, "Received message: ")
@@ -179,9 +179,9 @@ class Connection:
                 self.__parameters[param].type = FLOAT
 
             self.__parameters[param].value = params["cfg"][param]["v"]
-            if  self.__parameters[param].callback != None:
+            if self.__parameters[param].callback != None:
                  self.__parameters[param].callback(param, params["cfg"][param]["v"])
-        self.__publishMessage("dev/cfg",params)
+        self.__publishMessage("dev/cfg", params)
 
     def addParameter(self, name, val, type_, cb=None):
         if type_ == INT:
@@ -196,7 +196,7 @@ class Connection:
             val = float(val)
         self.__parameters[name] = LiveObjectsParameter(val, type_, cb)
 
-    def getParameter(self,name):
+    def getParameter(self, name):
         if self.__parameters[name].type == INT:
             return int(self.__parameters[name].value)
         elif self.__parameters[name].type == STRING:
@@ -220,12 +220,12 @@ class Connection:
 
     def addTag(self, tag):
         if not "tags" in self.__payload:
-            self.__payload["tags"]=[]
+            self.__payload["tags"] = []
         self.__payload["tags"].append(tag)
 
     def addTags(self, tags):
         if not "tags" in self.__payload:
-            self.__payload["tags"]=[]
+            self.__payload["tags"] = []
         for tag in tags:
             self.__payload["tags"].append(tag)
 
@@ -234,7 +234,7 @@ class Connection:
             sys.exit()
         self.__publishMessage("dev/data",self.__payload)
         self.__payload = {}
-        self.__payload[self.__value]={}
+        self.__payload[self.__value] = {}
 
     def __publishMessage(self, topic, msg):
         self.outputDebug(INFO, "Publishing message on topic: ", topic)
