@@ -29,9 +29,9 @@ class LiveObjectsParameter:
 
 
 class Connection:
-    def __init__(self, board, deviceID, port, apiKey, debug = True):
+    def __init__(self, board, deviceID, port, apiKey, debug=True):
         try: 
-            if sys.platform == "linux" or sys.platform=="win32":
+            if sys.platform == "linux" or sys.platform == "win32":
                 import paho.mqtt.client as paho
                 import os
                 self.mode = 1

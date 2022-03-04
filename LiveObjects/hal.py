@@ -187,7 +187,7 @@ def lte_connect(pin):
 
     from network import LTE
 
-    def is_waiting_for_pin():
+    def is_sim_waiting_for_pin():
         if lte.send_at_cmd('AT+CPIN?').strip() == '+CPIN: SIM PIN\r\n\r\nOK':
             return True
         else:
@@ -196,10 +196,10 @@ def lte_connect(pin):
     lte = LTE()
     time.sleep(2)
 
-    if is_waiting_for_pin():
+    if is_sim_waiting_for_pin():
         print("PIN", (lte.send_at_cmd('AT+CPIN="%s"' % pin)).strip())
     else:
-        print("PIN PRESENT OK")
+        print("PIN PRESENT: OK")
 
     lte.attach()
     print("Attaching... ", end='')
