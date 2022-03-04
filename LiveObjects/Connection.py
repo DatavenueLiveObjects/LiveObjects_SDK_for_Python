@@ -42,7 +42,7 @@ class Connection:
         self.__port = port
         self.__apiKey = apiKey
         self.__parameters = {}
-        self.__server = "liveobjects.orange-business.com"
+        self.__server = "mqtt.liveobjects.orange-business.com"
         self.__topic = "dev/data"
         self.__value = "value"
         self.__payload = {self.__value: {}}
@@ -54,7 +54,7 @@ class Connection:
             self.__mqtt = paho.Client(deviceID)
         else:
             self.ssl = port == 8883
-            self.__mqtt = MQTTClient(deviceID, self.__server, self.__port, "json+device", self.__apiKey, 0, self.ssl, {})
+            self.__mqtt = MQTTClient(deviceID, self.__server, self.__port, "json+device", self.__apiKey, 0, self.ssl, {'server_hostname':self.__server})
 
     def loop(self):
         if self.mode == 0:
@@ -107,8 +107,9 @@ class Connection:
             self.__mqtt.on_connect = self.__onConnect
             self.__mqtt.on_message = self.__onMessage
             if self.__port == 8883:
-                dirname = os.path.dirname(__file__)
-                filename = os.path.join(dirname, "./certfile.cer")
+                # dirname = os.path.dirname(__file__)
+                # filename = os.path.join(dirname, "./certfile.cer")
+                filename = "/etc/ssl/certs/ca-certificates.crt"
                 self.__mqtt.tls_set(filename)
             self.__mqtt.connect(self.__server, self.__port, 60)
             self.__mqtt.loop_start()

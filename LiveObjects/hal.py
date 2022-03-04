@@ -199,16 +199,16 @@ def lte_connect(pin):
     if is_waiting_for_pin():
         print("PIN", (lte.send_at_cmd('AT+CPIN="%s"' % pin)).strip())
     else:
-        print("PIN READY")
+        print("PIN PRESENT OK")
 
     lte.attach()
-    print("attaching... ", end='')
+    print("Attaching... ", end='')
     while not lte.isattached():
         time.sleep(1)
     print("attached!")
 
     lte.connect()
-    print("connecting... ", end='')
+    print("Connecting... ", end='')
     while not lte.isconnected():
         time.sleep(1)
     print("connected!")
