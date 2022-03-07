@@ -18,6 +18,9 @@ class BoardsInterface:
     WIFI = 3
     LTE = 4
 
+    PYTHON = 1
+    MICROPYTHON = 2
+
     @staticmethod
     def create_credentials(net_type):
         return LiveObjects.Credentials(net_type)
@@ -26,15 +29,20 @@ class BoardsInterface:
         return self._credentials.get_apikey()
 
     def get_client_id(self):
-        return self._lang + 'MQTT'
+        return self.get_lang_str() + 'MQTT'
 
-    @staticmethod
-    def mqtt_lib_import_str(lang):
-        import_strings = {
-            'microPython': 'from umqttrobust import MQTTClient',
-            'Python': 'import paho.mqtt.client as paho'
-        }
-        return import_strings[lang]
+    def get_lang_str(self):
+        lang_dict = {BoardsInterface.PYTHON: 'Python',
+                     BoardsInterface.MICROPYTHON: 'microPython'}
+        return lang_dict[self._lang_id]
+
+    def get_lang_id(self):
+        return self._lang_id
+
+    def mqtt_lib_import_str(self):
+        import_strings = {BoardsInterface.PYTHON: 'import paho.mqtt.client as paho',
+                          BoardsInterface.MICROPYTHON: 'from umqttrobust import MQTTClient'}
+        return import_strings[self._lang_id]
 
     def get_security_level(self):
         pass
@@ -57,12 +65,12 @@ class LoPy(BoardsInterface):
 
 class GPy(BoardsInterface):
     def __init__(self, net_type):
-        self._lang = 'microPython'
+        self._lang_id = BoardsInterface.MICROPYTHON
         self._net_type = BoardsInterface.WIFI if net_type == BoardsInterface.DEFAULT_CARRIER else net_type
         self._carrier_capability = (BoardsInterface.WIFI, BoardsInterface.LTE)
         self._wifi_tls_capability = True
         self._lte_tls_capability = True
-        self._mqtt_lib = super().mqtt_lib_import_str(self._lang)
+        self._mqtt_lib = super().mqtt_lib_import_str()
         self._credentials = super().create_credentials(self._net_type)
 
     def network_connect(self):
@@ -81,11 +89,11 @@ class GPy(BoardsInterface):
 
 class Esp8266(BoardsInterface):
     def __init__(self, net_type):
-        self._lang = 'microPython'
+        self._lang_id = BoardsInterface.MICROPYTHON
         self._net_type = BoardsInterface.WIFI if net_type == BoardsInterface.DEFAULT_CARRIER else net_type
         self._carrier_capability = (BoardsInterface.WIFI,)
         self._wifi_tls_capability = False
-        self._mqtt_lib = super().mqtt_lib_import_str(self._lang)
+        self._mqtt_lib = super().mqtt_lib_import_str()
         self._credentials = super().create_credentials(self._net_type)
 
     def network_connect(self):
@@ -102,11 +110,11 @@ class Win32(BoardsInterface):
 
 class Esp32(BoardsInterface):
     def __init__(self, net_type):
-        self._lang = 'microPython'
+        self._lang_id = BoardsInterface.MICROPYTHON
         self._net_type = BoardsInterface.WIFI if net_type == BoardsInterface.DEFAULT_CARRIER else net_type
         self._carrier_capability = (BoardsInterface.WIFI,)
         self._wifi_tls_capability = True
-        self._mqtt_lib = super().mqtt_lib_import_str(self._lang)
+        self._mqtt_lib = super().mqtt_lib_import_str()
         self._credentials = super().create_credentials(self._net_type)
 
     def network_connect(self):
@@ -119,11 +127,11 @@ class Esp32(BoardsInterface):
 
 class Linux(BoardsInterface):
     def __init__(self, net_type):
-        self._lang = 'Python'
+        self._lang_id = BoardsInterface.PYTHON
         self._net_type = BoardsInterface.EXISTING_NETWORK if net_type == BoardsInterface.DEFAULT_CARRIER else net_type
         self._carrier_capability = (BoardsInterface.EXISTING_NETWORK,)
         self._existing_network_tls_capability = True
-        self._mqtt_lib = super().mqtt_lib_import_str(self._lang)
+        self._mqtt_lib = super().mqtt_lib_import_str()
         self._credentials = super().create_credentials(self._net_type)
 
     def network_connect(self):
