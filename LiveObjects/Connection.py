@@ -57,7 +57,7 @@ class Connection:
 
         if self.mode == LiveObjects.BoardsInterface.PYTHON:
             self.__mqtt = paho.Client(deviceID)
-        else:
+        elif self.mode == LiveObjects.BoardsInterface.MICROPYTHON:
             self.ssl = port == 8883
             self.__mqtt = MQTTClient(deviceID, self.__server, self.__port, "json+device",
                                      self.__apiKey, 0, self.ssl, {'server_hostname': self.__server})
@@ -72,7 +72,7 @@ class Connection:
                 self.__parameterManager(msg)
             elif msg.topic == "dev/cmd":
                 self.__commandManager(msg)
-        else:
+        elif self.mode == LiveObjects.BoardsInterface.MICROPYTHON:
             if client == b"dev/cfg/upd":
                 self.__parameterManager(userdata)
             elif client == b"dev/cmd":
@@ -96,7 +96,7 @@ class Connection:
             #else:
                 #self.outputDebug(ERROR,"Unknown error while connecting,quitting...")
                 #sys.exit()
-        else:
+        elif self.mode == LiveObjects.BoardsInterface.MICROPYTHON:
             self.outputDebug(INFO, "Connected, sending config")
             if len(self.__commands) > 0:
                 self.outputDebug(INFO, "Subscribing commands")
@@ -117,7 +117,7 @@ class Connection:
                 self.__mqtt.tls_set(filename)
             self.__mqtt.connect(self.__server, self.__port, 60)
             self.__mqtt.loop_start()
-        else:
+        elif self.mode == LiveObjects.BoardsInterface.MICROPYTHON:
             self.__mqtt.set_callback(self.__onMessage)
             self.__mqtt.connect()
             time.sleep(1)
@@ -141,7 +141,7 @@ class Connection:
         if self.mode == LiveObjects.BoardsInterface.PYTHON:
             msgDict = json.loads(msg.payload)
             self.outputDebug(INFO, "Received message:\n", json.dumps(msgDict, sort_keys=True, indent=4))
-        else:
+        elif self.mode == LiveObjects.BoardsInterface.MICROPYTHON:
             msgDict = json.loads(msg)
             self.outputDebug(INFO, "Received message:", json.dumps(msgDict))
         outputMsg = {}
@@ -166,10 +166,11 @@ class Connection:
             self.outputDebug(INFO, "Received message: ")
             self.outputDebug(INFO, json.loads(msg.payload))
             params = json.loads(msg.payload)
-        else:
+        elif self.mode == LiveObjects.BoardsInterface.MICROPYTHON:
             self.outputDebug(INFO, "Received message: ")
             self.outputDebug(INFO, json.loads(msg))
             params = json.loads(msg)
+
         for param in params["cfg"]:
             if params["cfg"][param]["t"] == "i32":
                 self.__parameters[param].type = INT
@@ -245,7 +246,7 @@ class Connection:
 
         if self.mode == LiveObjects.BoardsInterface.PYTHON:
             self.outputDebug(INFO, "\n", json.dumps(msg, sort_keys=True, indent=4))
-        else:
+        elif self.mode == LiveObjects.BoardsInterface.MICROPYTHON:
             self.outputDebug(INFO, json.dumps(msg))
 
         self.__mqtt.publish(topic, json.dumps(msg))
