@@ -7,7 +7,9 @@
 import sys
 import json
 import time
-import os
+
+import LiveObjects
+
 INT = "i32"
 UINT = "u32"
 BINARY = "bin"
@@ -30,17 +32,18 @@ class LiveObjectsParameter:
 
 class Connection:
     def __init__(self, board, deviceID, port, apiKey, debug=True):
-        try: 
-            if sys.platform == "linux" or sys.platform == "win32":
+        self.mode = board.get_lang_id()
+
+        try:
+            if self.mode == LiveObjects.BoardsInterface.PYTHON:
                 import paho.mqtt.client as paho
                 import os
-                self.mode = 1
-            else:
+            elif self.mode == LiveObjects.BoardsInterface.MICROPYTHON:
                 from umqttrobust import MQTTClient
-                self.mode = 0
         except ImportError:
-            print("[ERROR] U have missing libraries Paho-mqtt(for Linux) or umqttrobust(for uPython)")
+            print("[ERROR] U have missing libraries Paho-mqtt(for Python) or umqttrobust(for uPython)")
             sys.exit()
+
         self.__port = port
         self.__apiKey = apiKey
         self.__parameters = {}
@@ -52,18 +55,19 @@ class Connection:
         self.__doLog = debug
         self.quit = False
 
-        if self.mode == 1:
+        if self.mode == LiveObjects.BoardsInterface.PYTHON:
             self.__mqtt = paho.Client(deviceID)
         else:
             self.ssl = port == 8883
-            self.__mqtt = MQTTClient(deviceID, self.__server, self.__port, "json+device", self.__apiKey, 0, self.ssl, {'server_hostname':self.__server})
+            self.__mqtt = MQTTClient(deviceID, self.__server, self.__port, "json+device",
+                                     self.__apiKey, 0, self.ssl, {'server_hostname': self.__server})
 
     def loop(self):
-        if self.mode == 0:
+        if self.mode == LiveObjects.BoardsInterface.MICROPYTHON:
             self.__mqtt.check_msg()
 
     def __onMessage(self, client="", userdata="", msg=""):
-        if self.mode == 1:
+        if self.mode == LiveObjects.BoardsInterface.PYTHON:
             if msg.topic == "dev/cfg/upd":
                 self.__parameterManager(msg)
             elif msg.topic == "dev/cmd":
@@ -75,7 +79,7 @@ class Connection:
                 self.__commandManager(userdata)
 
     def __onConnect(self, client="", userdata="", flags="", rc=""):
-        if self.mode == 1:
+        if self.mode == LiveObjects.BoardsInterface.PYTHON:
             if rc == 0:
                 self.outputDebug(INFO, "Connected!")
                 if len(self.__commands) > 0:
@@ -104,7 +108,7 @@ class Connection:
 
 
     def connect(self):
-        if self.mode == 1:
+        if self.mode == LiveObjects.BoardsInterface.PYTHON:
             self.__mqtt.username_pw_set("json+device", self.__apiKey)
             self.__mqtt.on_connect = self.__onConnect
             self.__mqtt.on_message = self.__onMessage
@@ -123,7 +127,7 @@ class Connection:
         self.__mqtt.disconnect()
         self.outputDebug(INFO, "Disconnected")
 
-    def outputDebug(self,info, *args):
+    def outputDebug(self, info, *args):
         if self.__doLog:
             print("[", info, "]", end=" ", sep="")
             for arg in args:
@@ -134,7 +138,7 @@ class Connection:
         self.__commands[name] = cmd
 
     def __commandManager(self, msg):
-        if self.mode == 1:
+        if self.mode == LiveObjects.BoardsInterface.PYTHON:
             msgDict = json.loads(msg.payload)
             self.outputDebug(INFO, "Received message:\n", json.dumps(msgDict, sort_keys=True, indent=4))
         else:
@@ -152,13 +156,13 @@ class Connection:
         return {"info": "Command not found"}
 
     def __sendConfig(self):
-        outMsg = { "cfg" : {} }
+        outMsg = {"cfg": {}}
         for param in self.__parameters:
             outMsg["cfg"][param] = {"t": self.__parameters[param].type, "v": self.__parameters[param].value}
         self.__publishMessage("dev/cfg", outMsg)
 
     def __parameterManager(self, msg):
-        if self.mode == 1:
+        if self.mode == LiveObjects.BoardsInterface.PYTHON:
             self.outputDebug(INFO, "Received message: ")
             self.outputDebug(INFO, json.loads(msg.payload))
             params = json.loads(msg.payload)
@@ -179,8 +183,8 @@ class Connection:
                 self.__parameters[param].type = FLOAT
 
             self.__parameters[param].value = params["cfg"][param]["v"]
-            if self.__parameters[param].callback != None:
-                 self.__parameters[param].callback(param, params["cfg"][param]["v"])
+            if self.__parameters[param].callback is not None:
+                self.__parameters[param].callback(param, params["cfg"][param]["v"])
         self.__publishMessage("dev/cfg", params)
 
     def addParameter(self, name, val, type_, cb=None):
@@ -232,14 +236,16 @@ class Connection:
     def sendData(self):
         if self.quit:
             sys.exit()
-        self.__publishMessage("dev/data",self.__payload)
+        self.__publishMessage("dev/data", self.__payload)
         self.__payload = {}
         self.__payload[self.__value] = {}
 
     def __publishMessage(self, topic, msg):
         self.outputDebug(INFO, "Publishing message on topic: ", topic)
-        if self.mode == 1:
+
+        if self.mode == LiveObjects.BoardsInterface.PYTHON:
             self.outputDebug(INFO, "\n", json.dumps(msg, sort_keys=True, indent=4))
         else:
             self.outputDebug(INFO, json.dumps(msg))
+
         self.__mqtt.publish(topic, json.dumps(msg))
