@@ -59,8 +59,47 @@ class Connection:
             self.__mqtt = paho.Client(deviceID)
         elif self.mode == LiveObjects.BoardsInterface.MICROPYTHON:
             self.ssl = port == 8883
-            self.__mqtt = MQTTClient(deviceID, self.__server, self.__port, "json+device",
-                                     self.__apiKey, 0, self.ssl, {'server_hostname': self.__server})
+
+            class MQTTClient2(MQTTClient):  # overriding original method wait_msg due to infinite waiting
+                def wait_msg(self):
+                    import select
+                    poller = select.poll()
+                    poller.register(self.sock, select.POLLIN)
+                    res = poller.poll(1000)
+                    if not res:
+                        res = None
+                    self.sock.setblocking(True)
+                    if res is None:
+                        return None
+                    if res == b"":
+                        raise OSError(-1)
+                    if res == b"\xd0":  # PINGRESP
+                        sz = self.sock.read(1)[0]
+                        assert sz == 0
+                        return None
+                    op = res[0]
+                    if op & 0xf0 != 0x30:
+                        return op
+                    sz = self._recv_len()
+                    topic_len = self.sock.read(2)
+                    topic_len = (topic_len[0] << 8) | topic_len[1]
+                    topic = self.sock.read(topic_len)
+                    sz -= topic_len + 2
+                    if op & 6:
+                        pid = self.sock.read(2)
+                        pid = pid[0] << 8 | pid[1]
+                        sz -= 2
+                    msg = self.sock.read(sz)
+                    self.cb(topic, msg)
+                    if op & 6 == 2:
+                        pkt = bytearray(b"\x40\x02\0\0")
+                        struct.pack_into("!H", pkt, 2, pid)
+                        self.sock.write(pkt)
+                    elif op & 6 == 4:
+                        assert 0
+
+            self.__mqtt = MQTTClient2(deviceID, self.__server, self.__port, "json+device",
+                                      self.__apiKey, 0, self.ssl, {'server_hostname': self.__server})
 
     def loop(self):
         if self.mode == LiveObjects.BoardsInterface.MICROPYTHON:
