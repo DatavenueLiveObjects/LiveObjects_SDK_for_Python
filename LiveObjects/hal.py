@@ -39,11 +39,6 @@ class BoardsInterface:
     def get_lang_id(self):
         return self._lang_id
 
-    def mqtt_lib_import_str(self):
-        import_strings = {BoardsInterface.PYTHON: 'import paho.mqtt.client as paho',
-                          BoardsInterface.MICROPYTHON: 'from umqttrobust import MQTTClient'}
-        return import_strings[self._lang_id]
-
     def get_security_level(self):
         pass
 
@@ -70,7 +65,6 @@ class GPy(BoardsInterface):
         self._carrier_capability = (BoardsInterface.WIFI, BoardsInterface.LTE)
         self._wifi_tls_capability = True
         self._lte_tls_capability = True
-        self._mqtt_lib = super().mqtt_lib_import_str()
         self._credentials = super().create_credentials(self._net_type)
 
     def network_connect(self):
@@ -93,7 +87,6 @@ class Esp8266(BoardsInterface):
         self._net_type = BoardsInterface.WIFI if net_type == BoardsInterface.DEFAULT_CARRIER else net_type
         self._carrier_capability = (BoardsInterface.WIFI,)
         self._wifi_tls_capability = False
-        self._mqtt_lib = super().mqtt_lib_import_str()
         self._credentials = super().create_credentials(self._net_type)
 
     def network_connect(self):
@@ -114,7 +107,6 @@ class Esp32(BoardsInterface):
         self._net_type = BoardsInterface.WIFI if net_type == BoardsInterface.DEFAULT_CARRIER else net_type
         self._carrier_capability = (BoardsInterface.WIFI,)
         self._wifi_tls_capability = True
-        self._mqtt_lib = super().mqtt_lib_import_str()
         self._credentials = super().create_credentials(self._net_type)
 
     def network_connect(self):
@@ -131,7 +123,6 @@ class Linux(BoardsInterface):
         self._net_type = BoardsInterface.EXISTING_NETWORK if net_type == BoardsInterface.DEFAULT_CARRIER else net_type
         self._carrier_capability = (BoardsInterface.EXISTING_NETWORK,)
         self._existing_network_tls_capability = True
-        self._mqtt_lib = super().mqtt_lib_import_str()
         self._credentials = super().create_credentials(self._net_type)
 
     def network_connect(self):

@@ -58,14 +58,15 @@ class Connection:
         if self.mode == LiveObjects.BoardsInterface.PYTHON:
             self.__mqtt = paho.Client(deviceID)
         elif self.mode == LiveObjects.BoardsInterface.MICROPYTHON:
-            self.ssl = port == 8883
 
-            class MQTTClient2(MQTTClient):  # overriding original method wait_msg due to infinite waiting
-                def wait_msg(self):
+            class MQTTClient2(MQTTClient):
+                TIMEOUT = 1000  # [ms]
+
+                def wait_msg(self):     # overriding original method wait_msg due to avoid infinite waiting
                     import select
                     poller = select.poll()
                     poller.register(self.sock, select.POLLIN)
-                    res = poller.poll(1000)
+                    res = poller.poll(MQTTClient2.TIMEOUT)
                     if not res:
                         res = None
                     self.sock.setblocking(True)
@@ -98,6 +99,7 @@ class Connection:
                     elif op & 6 == 4:
                         assert 0
 
+            self.ssl = port == SSL
             self.__mqtt = MQTTClient2(deviceID, self.__server, self.__port, "json+device",
                                       self.__apiKey, 0, self.ssl, {'server_hostname': self.__server})
 
@@ -145,13 +147,12 @@ class Connection:
                 self.__mqtt.subscribe(b"dev/cfg/upd")
                 self.__sendConfig()
 
-
     def connect(self):
         if self.mode == LiveObjects.BoardsInterface.PYTHON:
             self.__mqtt.username_pw_set("json+device", self.__apiKey)
             self.__mqtt.on_connect = self.__onConnect
             self.__mqtt.on_message = self.__onMessage
-            if self.__port == 8883:
+            if self.__port == SSL:
                 filename = "/etc/ssl/certs/ca-certificates.crt"
                 self.__mqtt.tls_set(filename)
             self.__mqtt.connect(self.__server, self.__port, 60)
