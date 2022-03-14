@@ -31,8 +31,9 @@ class LiveObjectsParameter:
 
 
 class Connection:
-    def __init__(self, board, deviceID, port, apiKey, debug=True):
-        self.mode = board.get_lang_id()
+    def __init__(self, debug=True):
+        self.__board = LiveObjects.BoardsFactory(net_type=LiveObjects.BoardsInterface.DEFAULT_CARRIER)
+        self.mode = self.__board.get_lang_id()
 
         try:
             if self.mode == LiveObjects.BoardsInterface.PYTHON:
@@ -44,8 +45,9 @@ class Connection:
             print("[ERROR] U have missing libraries Paho-mqtt(for Python) or umqttrobust(for uPython)")
             sys.exit()
 
-        self.__port = port
-        self.__apiKey = apiKey
+        self.__port = self.__board.get_security_level()
+        self.__apiKey = self.__board.get_apikey()
+        self.__device_id = self.__board.get_client_id()
         self.__parameters = {}
         self.__server = "mqtt.liveobjects.orange-business.com"
         self.__topic = "dev/data"
@@ -56,7 +58,7 @@ class Connection:
         self.quit = False
 
         if self.mode == LiveObjects.BoardsInterface.PYTHON:
-            self.__mqtt = paho.Client(deviceID)
+            self.__mqtt = paho.Client(self.__device_id)
         elif self.mode == LiveObjects.BoardsInterface.MICROPYTHON:
 
             class MQTTClient2(MQTTClient):
@@ -99,8 +101,8 @@ class Connection:
                     elif op & 6 == 4:
                         assert 0
 
-            self.ssl = port == SSL
-            self.__mqtt = MQTTClient2(deviceID, self.__server, self.__port, "json+device",
+            self.ssl = self.__port == SSL
+            self.__mqtt = MQTTClient2(self.__device_id, self.__server, self.__port, "json+device",
                                       self.__apiKey, 0, self.ssl, {'server_hostname': self.__server})
 
     def loop(self):
@@ -148,6 +150,7 @@ class Connection:
                 self.__sendConfig()
 
     def connect(self):
+        self.__board.connect()
         if self.mode == LiveObjects.BoardsInterface.PYTHON:
             self.__mqtt.username_pw_set("json+device", self.__apiKey)
             self.__mqtt.on_connect = self.__onConnect

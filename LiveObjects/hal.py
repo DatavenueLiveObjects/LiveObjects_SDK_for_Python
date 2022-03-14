@@ -47,7 +47,7 @@ class BoardsInterface:
             print('Carrier not supported.')
             sys.exit()
 
-    def network_connect(self):
+    def connect(self):
         pass
 
     def network_disconnect(self):
@@ -67,7 +67,7 @@ class GPy(BoardsInterface):
         self._lte_tls_capability = True
         self._credentials = super().create_credentials(self._net_type)
 
-    def network_connect(self):
+    def connect(self):
         super().check_network_capabilities(self._net_type)
         if self._net_type == BoardsInterface.WIFI:
             pycom_wifi_connect(self._credentials.get_creds()['ssid'], self._credentials.get_creds()['password'])
@@ -89,7 +89,7 @@ class Esp8266(BoardsInterface):
         self._wifi_tls_capability = False
         self._credentials = super().create_credentials(self._net_type)
 
-    def network_connect(self):
+    def connect(self):
         super().check_network_capabilities(self._net_type)
         wifi_connect(self._credentials.get_creds()['ssid'], self._credentials.get_creds()['password'])
 
@@ -109,7 +109,7 @@ class Esp32(BoardsInterface):
         self._wifi_tls_capability = True
         self._credentials = super().create_credentials(self._net_type)
 
-    def network_connect(self):
+    def connect(self):
         super().check_network_capabilities(self._net_type)
         wifi_connect(self._credentials.get_creds()['ssid'], self._credentials.get_creds()['password'])
 
@@ -125,7 +125,7 @@ class Linux(BoardsInterface):
         self._existing_network_tls_capability = True
         self._credentials = super().create_credentials(self._net_type)
 
-    def network_connect(self):
+    def connect(self):
         super().check_network_capabilities(self._net_type)
         use_existing_network_connection()
 

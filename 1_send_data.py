@@ -7,19 +7,11 @@
 import time
 import LiveObjects
 
-board = LiveObjects.BoardsFactory(net_type=LiveObjects.BoardsInterface.DEFAULT_CARRIER)
-
-apikey = board.get_apikey()
-client_id = board.get_client_id()
-security_level = board.get_security_level()
-
-# Create LiveObjects with parameters:  Board - ClientID - Security - APIKEY
-lo = LiveObjects.Connection(board, client_id, security_level, apikey)
+lo = LiveObjects.Connection()
 
 MESSAGE_RATE = 5
 
 # Main program
-board.network_connect()
 lo.connect()		# Connect to LiveObjects
 last = uptime = time.time()
 
