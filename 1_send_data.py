@@ -7,17 +7,18 @@
 import time
 import LiveObjects
 
+# Create LiveObjects
 lo = LiveObjects.Connection()
 
 MESSAGE_RATE = 5
 
 # Main program
-lo.connect()		# Connect to LiveObjects
+lo.connect()		                    # Connect to LiveObjects
 last = uptime = time.time()
 
 while True:
-	if (time.time()) >= last + MESSAGE_RATE:
-		lo.addToPayload("uptime", int(time.time() - uptime))		# Add value to payload: name - value
-		lo.sendData()												# Sending data to cloud
-		last = time.time()
-		lo.loop() 						# Check for incoming messages and if connection is still active
+    if (time.time()) >= last + MESSAGE_RATE:
+        lo.addToPayload("uptime", int(time.time() - uptime))		# Add value to payload: name - value
+        lo.sendData()					# Sending data to cloud
+        last = time.time()
+        lo.loop() 						# Check for incoming messages and if connection is still active

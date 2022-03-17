@@ -63,8 +63,8 @@ class GPy(BoardsInterface):
         self._lang_id = BoardsInterface.MICROPYTHON
         self._net_type = BoardsInterface.WIFI if net_type == BoardsInterface.DEFAULT_CARRIER else net_type
         self._carrier_capability = (BoardsInterface.WIFI, BoardsInterface.LTE)
-        self._wifi_tls_capability = True
-        self._lte_tls_capability = True
+        self._wifi_tls_capability = False
+        self._lte_tls_capability = False
         self._credentials = super().create_credentials(self._net_type)
 
     def connect(self):
