@@ -104,7 +104,23 @@ class Esp8266(BoardsInterface):
 
 
 class Win32(BoardsInterface):
-    pass
+    def __init__(self, net_type):
+        self._lang_id = BoardsInterface.PYTHON
+        self._os_id = BoardsInterface.WINDOWS
+        self._net_type = BoardsInterface.EXISTING_NETWORK if net_type == BoardsInterface.DEFAULT_CARRIER else net_type
+        self._carrier_capability = (BoardsInterface.EXISTING_NETWORK,)
+        self._existing_network_tls_capability = True
+        self._credentials = super().create_credentials(self._net_type)
+
+    def connect(self):
+        super().check_network_capabilities(self._net_type)
+        use_existing_network_connection()
+
+    def get_security_level(self):
+        return LiveObjects.SSL if self._existing_network_tls_capability else LiveObjects.NONE
+
+    def get_os_id(self):
+        return self._os_id
 
 
 class Esp32(BoardsInterface):

@@ -42,7 +42,7 @@ class Connection:
             elif self.mode == LiveObjects.BoardsInterface.MICROPYTHON:
                 from umqttrobust import MQTTClient
         except ImportError:
-            print("[ERROR] U have missing libraries Paho-mqtt(for Python) or umqttrobust(for uPython)")
+            print("[ERROR] U have missing libraries 'Paho-mqtt' (for Python) or 'umqttrobust' (for uPython)")
             sys.exit()
 
         self.__port = self.__board.get_security_level()
@@ -116,6 +116,15 @@ class Connection:
             self.__mqtt.on_message = self.__onMessage
             if self.__port == SSL:
                 filename = "/etc/ssl/certs/ca-certificates.crt"
+
+                if self.__board.get_os_id() == LiveObjects.BoardsInterface.WINDOWS:
+                    try:
+                        import certifi
+                        filename = certifi.where()
+                    except ImportError:
+                        print("[ERROR] U have missing library 'python-certifi-win32'")
+                        sys.exit()
+
                 self.__mqtt.tls_set(filename)
             self.__mqtt.connect(self.__server, self.__port, 60)
             self.__mqtt.loop_start()
