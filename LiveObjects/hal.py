@@ -21,6 +21,9 @@ class BoardsInterface:
     PYTHON = 1
     MICROPYTHON = 2
 
+    WINDOWS = 1
+    LINUX = 2
+
     @staticmethod
     def create_credentials(net_type):
         return LiveObjects.Credentials(net_type)
@@ -38,6 +41,9 @@ class BoardsInterface:
 
     def get_lang_id(self):
         return self._lang_id
+
+    def get_os_id(self):
+        pass
 
     def get_security_level(self):
         pass
@@ -120,6 +126,7 @@ class Esp32(BoardsInterface):
 class Linux(BoardsInterface):
     def __init__(self, net_type):
         self._lang_id = BoardsInterface.PYTHON
+        self._os_id = BoardsInterface.LINUX
         self._net_type = BoardsInterface.EXISTING_NETWORK if net_type == BoardsInterface.DEFAULT_CARRIER else net_type
         self._carrier_capability = (BoardsInterface.EXISTING_NETWORK,)
         self._existing_network_tls_capability = True
@@ -131,6 +138,9 @@ class Linux(BoardsInterface):
 
     def get_security_level(self):
         return LiveObjects.SSL if self._existing_network_tls_capability else LiveObjects.NONE
+
+    def get_os_id(self):
+        return self._os_id
 
 
 class BoardsFactory:
