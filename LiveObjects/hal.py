@@ -146,7 +146,7 @@ class Linux(BoardsInterface):
 class BoardsFactory:
 
     def __new__(cls, net_type):
-        s = os.uname().sysname
+        s = sys.platform
         sn = s[0].upper() + s[1:]  # capitalize first letter
         board = eval(sn)(net_type)  # instance of board w/ net type: WiFi, LTE, etc.
         return board
