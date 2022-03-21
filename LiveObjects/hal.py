@@ -48,6 +48,9 @@ class BoardsInterface:
     def get_security_level(self):
         pass
 
+    def get_store_cert_filename(self):
+        pass
+
     def check_network_capabilities(self, net_type):
         if net_type not in self._carrier_capability:
             print('Carrier not supported.')
@@ -122,6 +125,14 @@ class Win32(BoardsInterface):
     def get_os_id(self):
         return self._os_id
 
+    def get_store_cert_filename(self):
+        try:
+            import certifi
+            return certifi.where()
+        except ImportError:
+            print("[ERROR] U have missing library 'python-certifi-win32'")
+            sys.exit()
+
 
 class Esp32(BoardsInterface):
     def __init__(self, net_type):
@@ -147,6 +158,7 @@ class Linux(BoardsInterface):
         self._carrier_capability = (BoardsInterface.EXISTING_NETWORK,)
         self._existing_network_tls_capability = True
         self._credentials = super().create_credentials(self._net_type)
+        self._cert_store_filename = "/etc/ssl/certs/ca-certificates.crt"
 
     def connect(self):
         super().check_network_capabilities(self._net_type)
@@ -157,6 +169,9 @@ class Linux(BoardsInterface):
 
     def get_os_id(self):
         return self._os_id
+
+    def get_store_cert_filename(self):
+        return self._cert_store_filename
 
 
 class BoardsFactory:

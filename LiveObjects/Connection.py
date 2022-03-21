@@ -115,17 +115,7 @@ class Connection:
             self.__mqtt.on_connect = self.__onConnect
             self.__mqtt.on_message = self.__onMessage
             if self.__port == SSL:
-                filename = "/etc/ssl/certs/ca-certificates.crt"
-
-                if self.__board.get_os_id() == LiveObjects.BoardsInterface.WINDOWS:
-                    try:
-                        import certifi
-                        filename = certifi.where()
-                    except ImportError:
-                        print("[ERROR] U have missing library 'python-certifi-win32'")
-                        sys.exit()
-
-                self.__mqtt.tls_set(filename)
+                self.__mqtt.tls_set(self.__board.get_store_cert_filename())
             self.__mqtt.connect(self.__server, self.__port, 60)
             self.__mqtt.loop_start()
         elif self.mode == LiveObjects.BoardsInterface.MICROPYTHON:
