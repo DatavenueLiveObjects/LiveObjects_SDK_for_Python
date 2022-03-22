@@ -21,9 +21,6 @@ class BoardsInterface:
     PYTHON = 1
     MICROPYTHON = 2
 
-    WINDOWS = 1
-    LINUX = 2
-
     @staticmethod
     def create_credentials(net_type):
         return LiveObjects.Credentials(net_type)
@@ -41,9 +38,6 @@ class BoardsInterface:
 
     def get_lang_id(self):
         return self._lang_id
-
-    def get_os_id(self):
-        pass
 
     def get_security_level(self):
         pass
@@ -75,11 +69,13 @@ class GPy(BoardsInterface):
         self._wifi_tls_capability = False
         self._lte_tls_capability = False
         self._credentials = super().create_credentials(self._net_type)
+        self._hostname = 'GPy'
 
     def connect(self):
         super().check_network_capabilities(self._net_type)
         if self._net_type == BoardsInterface.WIFI:
-            pycom_wifi_connect(self._credentials.get_creds()['ssid'], self._credentials.get_creds()['password'])
+            pycom_wifi_connect(self._credentials.get_creds()['ssid'], self._credentials.get_creds()['password'],
+                               self._hostname)
         elif self._net_type == BoardsInterface.LTE:
             lte_connect(self._credentials.get_creds()['pin'])
 
@@ -109,7 +105,6 @@ class Esp8266(BoardsInterface):
 class Win32(BoardsInterface):
     def __init__(self, net_type):
         self._lang_id = BoardsInterface.PYTHON
-        self._os_id = BoardsInterface.WINDOWS
         self._net_type = BoardsInterface.EXISTING_NETWORK if net_type == BoardsInterface.DEFAULT_CARRIER else net_type
         self._carrier_capability = (BoardsInterface.EXISTING_NETWORK,)
         self._existing_network_tls_capability = True
@@ -153,7 +148,6 @@ class Esp32(BoardsInterface):
 class Linux(BoardsInterface):
     def __init__(self, net_type):
         self._lang_id = BoardsInterface.PYTHON
-        self._os_id = BoardsInterface.LINUX
         self._net_type = BoardsInterface.EXISTING_NETWORK if net_type == BoardsInterface.DEFAULT_CARRIER else net_type
         self._carrier_capability = (BoardsInterface.EXISTING_NETWORK,)
         self._existing_network_tls_capability = True
@@ -178,7 +172,7 @@ class BoardsFactory:
 
     def __new__(cls, net_type):
         s = sys.platform
-        sn = s[0].upper() + s[1:]  # capitalize first letter
+        sn = s[0].upper() + s[1:]   # capitalize first letter
         board = eval(sn)(net_type)  # instance of board w/ net type: WiFi, LTE, etc.
         return board
 
@@ -204,11 +198,11 @@ def wifi_connect(ssid, password):
 CONN_TIMEOUT = 20
 
 
-def pycom_wifi_connect(ssid, password):
+def pycom_wifi_connect(ssid, password, hostname):
     from network import WLAN
 
     wlan = WLAN(mode=WLAN.STA)
-    wlan.hostname('xPy_1')
+    wlan.hostname(hostname)
     start_time = time.time()
     while 1:
         print("Trying to connect...")
