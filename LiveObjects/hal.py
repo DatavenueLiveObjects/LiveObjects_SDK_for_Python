@@ -117,9 +117,6 @@ class Win32(BoardsInterface):
     def get_security_level(self):
         return LiveObjects.SSL if self._existing_network_tls_capability else LiveObjects.NONE
 
-    def get_os_id(self):
-        return self._os_id
-
     def get_store_cert_filename(self):
         try:
             import certifi
@@ -160,9 +157,6 @@ class Linux(BoardsInterface):
 
     def get_security_level(self):
         return LiveObjects.SSL if self._existing_network_tls_capability else LiveObjects.NONE
-
-    def get_os_id(self):
-        return self._os_id
 
     def get_store_cert_filename(self):
         return self._cert_store_filename
