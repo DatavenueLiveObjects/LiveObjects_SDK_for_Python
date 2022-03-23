@@ -58,7 +58,23 @@ class BoardsInterface:
 
 
 class LoPy(BoardsInterface):
-    pass
+    def __init__(self, net_type):
+        self._lang_id = BoardsInterface.MICROPYTHON
+        self._net_type = BoardsInterface.WIFI if net_type == BoardsInterface.DEFAULT_CARRIER else net_type
+        self._carrier_capability = (BoardsInterface.WIFI,)
+        self._wifi_tls_capability = False
+        self._credentials = super().create_credentials(self._net_type)
+        self._hostname = 'LoPy'
+
+    def connect(self):
+        super().check_network_capabilities(self._net_type)
+        if self._net_type == BoardsInterface.WIFI:
+            pycom_wifi_connect(self._credentials.get_creds()['ssid'], self._credentials.get_creds()['password'],
+                               self._hostname)
+
+    def get_security_level(self):
+        if self._net_type == BoardsInterface.WIFI:
+            return LiveObjects.SSL if self._wifi_tls_capability else LiveObjects.NONE
 
 
 class GPy(BoardsInterface):
