@@ -236,7 +236,7 @@ If your board needs function supporting its equipment you need to put it in this
 
 Change **\<APIKEY\>** in `credentials.py` to one you generated.\
 Change **\<WIFI_SSID\>** and **\<WIFI_PASS\>** suitable to your Wi-Fi or 
-change **\<PIN\>** and **\<APN_NAME\>** suitable to your SIM card.
+change **\<PIN\>** and **\<APN\>** suitable to your SIM card.
 
 2. Copy files into device
 ```Shell
