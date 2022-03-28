@@ -3,21 +3,21 @@
 
 This code wraps all the functions necessary to make your object work with Live Objects.
 
- You can declare parameters, which you can later update OTA from Live objects. You can also create commands to trigger actions remotely.
- Only thing you must do yourself is connecting the board with internet.
+You can declare parameters, which you can later update OTA from Live objects. You can also create commands to trigger actions remotely.
+Only thing you must do yourself is connecting the board with internet.
 
 Code uses MQTT connection to exchange data with Live objects under the hood to keep your parameters up to date or execute the commands received without you having to take care of them (apart from writing the code of these commands, of course).
 
 ## Compatibility ##
-| System        | Connectivity    | MQTT | MQTTS |
-|:--------------|-----------------|:----:|:-----:|
-| Linux         | Delivered by OS |  OK  |  OK   |
-| Windows       | Delivered by OS |  OK  |  OK   |
-| Raspberry Pi  | Delivered by OS |  OK  |  OK   |
-| ESP8266       | WiFi            |  OK  |   -   |
-| ESP32         | WiFi            |  OK  |  OK   |
-| LoPy (Pycom)  | WiFi            |  OK  |   -   |
-| GPy (Pycom)   | WiFi, LTE       |  OK  |   -   |
+| System        | MQTT | MQTTS |
+|:--------------|:----:|:-----:|
+| Linux         |  OK  |  OK   |
+| Windows       |  OK  |  OK   |
+| Raspberry Pi  |  OK  |  OK   |
+| ESP8266       |  OK  |   -   |
+| ESP32         |  OK  |  OK   |
+| LoPy (Pycom)  |  OK  |   -   |
+| GPy (Pycom)   |  OK  |   -   |
 
 ## Prerequisites / dependecies ##
 This code needs a few libraries to run:
@@ -168,6 +168,60 @@ def foo():
     lo.disconnect()
 ```
 
+### Changing default carrier to connect to the network ###
+
+Every board has its own default carrier for connection to the network (see below). 
+
+| System        | Default carrier | Optional carrier |
+|:--------------|:---------------:|:----------------:|
+| Linux         | Delivered by OS |        -         |
+| Windows       | Delivered by OS |        -         |
+| Raspberry Pi  | Delivered by OS |        -         |
+| ESP8266       |      Wi-Fi      |        -         |
+| ESP32         |      Wi-Fi      |        -         |
+| LoPy (Pycom)  |      Wi-Fi      |        -         |
+| GPy (Pycom)   |      Wi-Fi      |       LTE        |
+
+For GPy you can switch connectivity to optional carrier. You need to do change in `Connection` class in `Connection.py`
+from:
+```Python
+def __init__(self, debug=True):
+    self.__board = LiveObjects.BoardsFactory(net_type=LiveObjects.BoardsInterface.DEFAULT_CARRIER)
+...
+```
+to:
+```Python
+def __init__(self, debug=True):
+    self.__board = LiveObjects.BoardsFactory(net_type=LiveObjects.BoardsInterface.LTE)
+...
+```
+Then GPy will connect via LTE network.
+
+### Adding new boards ###
+
+There is possibility to add your new type of board supporting Python/uPython. 
+You need to add your own class in `hal.py`.
+Below code shows basic constructor:
+```Python
+def __init__(self, net_type):
+    self._lang_id = BoardsInterface.MICROPYTHON
+    self._net_type = BoardsInterface.WIFI if net_type == BoardsInterface.DEFAULT_CARRIER else net_type
+    self._carrier_capability = (BoardsInterface.WIFI,)
+    self._wifi_tls_capability = False
+    self._credentials = super().create_credentials(self._net_type)
+```
+Basic fields meaning:
+- **_lang_id**: used Python dialect: PYTHON / MICROPYTHON,
+- **_net_type**: used type of network: WIFI / LTE / network delivered by OS / ...
+- **_carrier_capability**: _tuple_ containing supported type(s) of network,
+- **_wifi_tls_capability**: _True_ if TLS is supported and MQTTS could be used, 
+- **_credentials**: required credentials depended on network type: SSID/PASS for Wi-Fi, PIN/APN for LTE etc. 
+
+If other specific fields are necessary you need to define them.
+You need to override specific methods - e.g. `connect` which is depended on type of board. 
+All specific functions are placed at the end of `hal.py`. 
+If your board needs function supporting its equipment you need to put it in this place.   
+
 
 # Installation guide for uPython #
 ## Example for ESP32 / ESP8266 ##
@@ -181,8 +235,8 @@ def foo():
 1. Preparation 
 
 Change **\<APIKEY\>** in `credentials.py` to one you generated.\
-Change **\<WIFI_SSID\>** and **\<WIFI_PASS\>** suitable to your WiFi.
-
+Change **\<WIFI_SSID\>** and **\<WIFI_PASS\>** suitable to your Wi-Fi or 
+change **\<PIN\>** and **\<APN_NAME\>** suitable to your SIM card.
 
 2. Copy files into device
 ```Shell
@@ -190,7 +244,8 @@ Change **\<WIFI_SSID\>** and **\<WIFI_PASS\>** suitable to your WiFi.
 >ampy -pCOMXX put simple.py   
 >ampy -pCOMXX put LiveObjects // It will copy directory with its content 
 ```
-3. Prepare your script and save it as `main.py` then copy file into device. You can use one of example ones (`1_send_data.py`, ...) renaming it to `main.py` 
+3. Prepare your script and save it as `main.py` then copy file into device. 
+You can use one of example ones (`1_send_data.py`, ...) renaming it to `main.py` 
 ```Shell
 >ampy -pCOMXX put main.py
 ```
@@ -202,6 +257,7 @@ Change **\<WIFI_SSID\>** and **\<WIFI_PASS\>** suitable to your WiFi.
     Ctrl + C Stops currently running script
 
 ### Summary ###
+
 After all steps content of the device should look like below:
 ```Shell
 >ampy -pCOMXX ls
@@ -220,7 +276,8 @@ After all steps content of the device should look like below:
 
 ## Example for LoPy / GPy ##
 
-You can do the steps as above but better is to use [Pymakr plug-in](https://pycom.io/products/supported-networks/pymakr/) for **Visual Studio Code** or **Atom** delivered by [Pycom](https://pycom.io/). Plug-in supports code development, its upload to board and communication with board. 
+You can do the steps as above but better is to use [Pymakr plug-in](https://pycom.io/products/supported-networks/pymakr/) for **Visual Studio Code** or **Atom** delivered by [Pycom](https://pycom.io/). 
+Plug-in supports code development, its upload to the board and communication with board. 
 
 ## Troubleshooting ##
 If you are getting 'MQTT exception: 5' check your api key
