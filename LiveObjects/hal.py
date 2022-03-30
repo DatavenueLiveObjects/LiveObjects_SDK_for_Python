@@ -4,7 +4,6 @@
 # This software is distributed under the terms and conditions of the 'MIT'
 # license which can be found in the file 'LICENSE.md' in this package distribution
 
-import os
 import time
 import sys
 
@@ -29,7 +28,7 @@ class BoardsInterface:
         return self._credentials.get_apikey()
 
     def get_client_id(self):
-        return self.get_lang_str() + 'MQTT'
+        pass
 
     def get_lang_str(self):
         lang_dict = {BoardsInterface.PYTHON: 'Python',
@@ -76,6 +75,9 @@ class LoPy(BoardsInterface):
         if self._net_type == BoardsInterface.WIFI:
             return LiveObjects.SSL if self._wifi_tls_capability else LiveObjects.NONE
 
+    def get_client_id(self):
+        return self.get_lang_str() + 'MQTT'
+
 
 class GPy(BoardsInterface):
     def __init__(self, net_type):
@@ -101,6 +103,8 @@ class GPy(BoardsInterface):
         elif self._net_type == BoardsInterface.LTE:
             return LiveObjects.SSL if self._lte_tls_capability else LiveObjects.NONE
 
+    def get_client_id(self):
+        return self.get_lang_str() + 'MQTT'
 
 class Esp8266(BoardsInterface):
     def __init__(self, net_type):
@@ -116,6 +120,9 @@ class Esp8266(BoardsInterface):
 
     def get_security_level(self):
         return LiveObjects.SSL if self._wifi_tls_capability else LiveObjects.NONE
+
+    def get_client_id(self):
+        return self.get_lang_str() + 'MQTT'
 
 
 class Win32(BoardsInterface):
@@ -141,6 +148,10 @@ class Win32(BoardsInterface):
             print("[ERROR] U have missing library 'python-certifi-win32'")
             sys.exit()
 
+    def get_client_id(self):
+        import uuid
+        return self.get_lang_str() + 'MQTT_' + (''.join(['{:02x}'.format((uuid.getnode() >> ele) & 0xff) for ele in range(0,8*6,8)][::-1]))
+
 
 class Esp32(BoardsInterface):
     def __init__(self, net_type):
@@ -156,6 +167,9 @@ class Esp32(BoardsInterface):
 
     def get_security_level(self):
         return LiveObjects.SSL if self._wifi_tls_capability else LiveObjects.NONE
+
+    def get_client_id(self):
+        return self.get_lang_str() + 'MQTT'
 
 
 class Linux(BoardsInterface):
@@ -176,6 +190,10 @@ class Linux(BoardsInterface):
 
     def get_store_cert_filename(self):
         return self._cert_store_filename
+
+    def get_client_id(self):
+        import uuid
+        return self.get_lang_str() + 'MQTT_' + (''.join(['{:02x}'.format((uuid.getnode() >> ele) & 0xff) for ele in range(0,8*6,8)][::-1]))
 
 
 class BoardsFactory:
