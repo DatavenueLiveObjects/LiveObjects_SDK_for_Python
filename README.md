@@ -200,7 +200,13 @@ Then GPy will connect via LTE network.
 ### Adding new boards ###
 
 There is possibility to add your new type of board supporting Python/uPython. 
-You need to add your own class in `hal.py`.
+You need to add your own class in `hal.py`. Name of this class has to be the same as output of `sys.platform`
+and has to start from capital letter.
+```commandline
+>>> sys.platform
+'GPy'
+>>> 
+```
 Below code shows basic constructor:
 ```Python
 def __init__(self, net_type):
