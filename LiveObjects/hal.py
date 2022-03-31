@@ -76,7 +76,7 @@ class LoPy(BoardsInterface):
             return LiveObjects.SSL if self._wifi_tls_capability else LiveObjects.NONE
 
     def get_client_id(self):
-        return self.get_lang_str() + 'MQTT'
+        return self.get_lang_str() + 'MQTT_' + get_pycom_mac()
 
 
 class GPy(BoardsInterface):
@@ -104,7 +104,11 @@ class GPy(BoardsInterface):
             return LiveObjects.SSL if self._lte_tls_capability else LiveObjects.NONE
 
     def get_client_id(self):
-        return self.get_lang_str() + 'MQTT'
+        if self._net_type == BoardsInterface.WIFI:
+            return self.get_lang_str() + 'MQTT_' + get_pycom_mac()
+        elif self._net_type == BoardsInterface.LTE:
+            return self.get_lang_str() + 'MQTT_' + get_pycom_imei()
+
 
 class Esp8266(BoardsInterface):
     def __init__(self, net_type):
@@ -122,7 +126,7 @@ class Esp8266(BoardsInterface):
         return LiveObjects.SSL if self._wifi_tls_capability else LiveObjects.NONE
 
     def get_client_id(self):
-        return self.get_lang_str() + 'MQTT'
+        return self.get_lang_str() + 'MQTT_' + get_esp_mac()
 
 
 class Win32(BoardsInterface):
@@ -149,8 +153,7 @@ class Win32(BoardsInterface):
             sys.exit()
 
     def get_client_id(self):
-        import uuid
-        return self.get_lang_str() + 'MQTT_' + (''.join(['{:02x}'.format((uuid.getnode() >> ele) & 0xff) for ele in range(0,8*6,8)][::-1]))
+        return self.get_lang_str() + 'MQTT_' + get_mac()
 
 
 class Esp32(BoardsInterface):
@@ -169,7 +172,7 @@ class Esp32(BoardsInterface):
         return LiveObjects.SSL if self._wifi_tls_capability else LiveObjects.NONE
 
     def get_client_id(self):
-        return self.get_lang_str() + 'MQTT'
+        return self.get_lang_str() + 'MQTT_' + get_esp_mac()
 
 
 class Linux(BoardsInterface):
@@ -192,8 +195,7 @@ class Linux(BoardsInterface):
         return self._cert_store_filename
 
     def get_client_id(self):
-        import uuid
-        return self.get_lang_str() + 'MQTT_' + (''.join(['{:02x}'.format((uuid.getnode() >> ele) & 0xff) for ele in range(0,8*6,8)][::-1]))
+        return self.get_lang_str() + 'MQTT_' + get_mac()
 
 
 class BoardsFactory:
@@ -209,10 +211,15 @@ def use_existing_network_connection():
     print('Using existing network connection')
 
 
-def wifi_connect(ssid, password):
-    import network
+def get_mac():
+    import uuid
+    return ''.join(['{:02x}'.format((uuid.getnode() >> ele) & 0xff) for ele in range(0, 8*6, 8)][::-1]).upper()
 
-    sta_if = network.WLAN(network.STA_IF)
+
+def wifi_connect(ssid, password):
+    from network import WLAN, STA_IF
+
+    sta_if = WLAN(STA_IF)
     sta_if.active(True)
     while not sta_if.isconnected():
         print('Connecting to network...')
@@ -221,6 +228,12 @@ def wifi_connect(ssid, password):
             break
         time.sleep(2)
     print('Network config:', sta_if.ifconfig())
+
+
+def get_esp_mac():
+    from network import WLAN
+    import binascii
+    return binascii.hexlify(WLAN().config('mac')).decode('ascii').upper()
 
 
 CONN_TIMEOUT = 20
@@ -245,8 +258,13 @@ def pycom_wifi_connect(ssid, password, hostname):
             break
 
 
-def lte_connect(pin):
+def get_pycom_mac():
+    from network import WLAN
+    import binascii
+    return binascii.hexlify(WLAN().mac()[0]).decode('ascii').upper()
 
+
+def lte_connect(pin):
     from network import LTE
 
     def is_sim_waiting_for_pin():
@@ -274,3 +292,8 @@ def lte_connect(pin):
     while not lte.isconnected():
         time.sleep(1)
     print("connected!")
+
+
+def get_pycom_imei():
+    from network import LTE
+    return LTE().imei()
