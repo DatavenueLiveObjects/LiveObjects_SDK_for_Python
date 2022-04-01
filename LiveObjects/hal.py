@@ -4,7 +4,7 @@
 # This software is distributed under the terms and conditions of the 'MIT'
 # license which can be found in the file 'LICENSE.md' in this package distribution
 
-import time
+# import time
 import sys
 
 import LiveObjects
@@ -68,6 +68,7 @@ class LoPy(BoardsInterface):
     def connect(self):
         super().check_network_capabilities(self._net_type)
         if self._net_type == BoardsInterface.WIFI:
+            from LiveObjects.services import pycom_wifi_connect
             pycom_wifi_connect(self._credentials.get_creds()['ssid'], self._credentials.get_creds()['password'],
                                self._hostname)
 
@@ -76,6 +77,7 @@ class LoPy(BoardsInterface):
             return LiveObjects.SSL if self._wifi_tls_capability else LiveObjects.NONE
 
     def get_client_id(self):
+        from LiveObjects.services import get_pycom_mac
         return self.get_lang_str() + 'MQTT_' + get_pycom_mac()
 
 
@@ -92,9 +94,11 @@ class GPy(BoardsInterface):
     def connect(self):
         super().check_network_capabilities(self._net_type)
         if self._net_type == BoardsInterface.WIFI:
+            from LiveObjects.services import pycom_wifi_connect
             pycom_wifi_connect(self._credentials.get_creds()['ssid'], self._credentials.get_creds()['password'],
                                self._hostname)
         elif self._net_type == BoardsInterface.LTE:
+            from LiveObjects.services import lte_connect
             lte_connect(self._credentials.get_creds()['pin'])
 
     def get_security_level(self):
@@ -105,8 +109,10 @@ class GPy(BoardsInterface):
 
     def get_client_id(self):
         if self._net_type == BoardsInterface.WIFI:
+            from LiveObjects.services import get_pycom_mac
             return self.get_lang_str() + 'MQTT_' + get_pycom_mac()
         elif self._net_type == BoardsInterface.LTE:
+            from LiveObjects.services import get_pycom_imei
             return self.get_lang_str() + 'MQTT_' + get_pycom_imei()
 
 
@@ -119,6 +125,7 @@ class Esp8266(BoardsInterface):
         self._credentials = super().create_credentials(self._net_type)
 
     def connect(self):
+        from LiveObjects.services import wifi_connect
         super().check_network_capabilities(self._net_type)
         wifi_connect(self._credentials.get_creds()['ssid'], self._credentials.get_creds()['password'])
 
@@ -126,6 +133,7 @@ class Esp8266(BoardsInterface):
         return LiveObjects.SSL if self._wifi_tls_capability else LiveObjects.NONE
 
     def get_client_id(self):
+        from LiveObjects.services import get_esp_mac
         return self.get_lang_str() + 'MQTT_' + get_esp_mac()
 
 
@@ -138,6 +146,7 @@ class Win32(BoardsInterface):
         self._credentials = super().create_credentials(self._net_type)
 
     def connect(self):
+        from LiveObjects.services import use_existing_network_connection
         super().check_network_capabilities(self._net_type)
         use_existing_network_connection()
 
@@ -153,6 +162,7 @@ class Win32(BoardsInterface):
             sys.exit()
 
     def get_client_id(self):
+        from LiveObjects.services import get_mac
         return self.get_lang_str() + 'MQTT_' + get_mac()
 
 
@@ -165,6 +175,7 @@ class Esp32(BoardsInterface):
         self._credentials = super().create_credentials(self._net_type)
 
     def connect(self):
+        from LiveObjects.services import wifi_connect
         super().check_network_capabilities(self._net_type)
         wifi_connect(self._credentials.get_creds()['ssid'], self._credentials.get_creds()['password'])
 
@@ -172,6 +183,7 @@ class Esp32(BoardsInterface):
         return LiveObjects.SSL if self._wifi_tls_capability else LiveObjects.NONE
 
     def get_client_id(self):
+        from LiveObjects.services import get_esp_mac
         return self.get_lang_str() + 'MQTT_' + get_esp_mac()
 
 
@@ -185,6 +197,7 @@ class Linux(BoardsInterface):
         self._cert_store_filename = "/etc/ssl/certs/ca-certificates.crt"
 
     def connect(self):
+        from LiveObjects.services import use_existing_network_connection
         super().check_network_capabilities(self._net_type)
         use_existing_network_connection()
 
@@ -195,6 +208,7 @@ class Linux(BoardsInterface):
         return self._cert_store_filename
 
     def get_client_id(self):
+        from LiveObjects.services import get_mac
         return self.get_lang_str() + 'MQTT_' + get_mac()
 
 
@@ -205,95 +219,3 @@ class BoardsFactory:
         sn = s[0].upper() + s[1:]   # capitalize first letter
         board = eval(sn)(net_type)  # instance of board w/ net type: WiFi, LTE, etc.
         return board
-
-
-def use_existing_network_connection():
-    print('Using existing network connection')
-
-
-def get_mac():
-    import uuid
-    return ''.join(['{:02x}'.format((uuid.getnode() >> ele) & 0xff) for ele in range(0, 8*6, 8)][::-1]).upper()
-
-
-def wifi_connect(ssid, password):
-    from network import WLAN, STA_IF
-
-    sta_if = WLAN(STA_IF)
-    sta_if.active(True)
-    while not sta_if.isconnected():
-        print('Connecting to network...')
-        sta_if.connect(ssid, password)
-        if sta_if.isconnected():
-            break
-        time.sleep(2)
-    print('Network config:', sta_if.ifconfig())
-
-
-def get_esp_mac():
-    from network import WLAN
-    import binascii
-    return binascii.hexlify(WLAN().config('mac')).decode('ascii').upper()
-
-
-CONN_TIMEOUT = 20
-
-
-def pycom_wifi_connect(ssid, password, hostname):
-    from network import WLAN
-
-    wlan = WLAN(mode=WLAN.STA)
-    wlan.hostname(hostname)
-    start_time = time.time()
-    while 1:
-        print("Trying to connect...")
-        wlan.connect(ssid=ssid, auth=(WLAN.WPA2, password))
-        time.sleep_ms(3000)
-        if wlan.isconnected():
-            print("WiFi connected successfully")
-            print('IPs:', wlan.ifconfig(), 'Channel:', wlan.channel())
-            break
-        elif time.time() - start_time > CONN_TIMEOUT:
-            print("WiFi not connected. Stopped.")
-            break
-
-
-def get_pycom_mac():
-    from network import WLAN
-    import binascii
-    return binascii.hexlify(WLAN().mac()[0]).decode('ascii').upper()
-
-
-def lte_connect(pin):
-    from network import LTE
-
-    def is_sim_waiting_for_pin():
-        if lte.send_at_cmd('AT+CPIN?').strip() == '+CPIN: SIM PIN\r\n\r\nOK':
-            return True
-        else:
-            return False
-
-    lte = LTE()
-    time.sleep(2)
-
-    if is_sim_waiting_for_pin():
-        print("PIN", (lte.send_at_cmd('AT+CPIN="%s"' % pin)).strip())
-    else:
-        print("PIN PRESENT: OK")
-
-    lte.attach()
-    print("Attaching... ", end='')
-    while not lte.isattached():
-        time.sleep(1)
-    print("attached!")
-
-    lte.connect()
-    print("Connecting... ", end='')
-    while not lte.isconnected():
-        time.sleep(1)
-    print("connected!")
-
-
-def get_pycom_imei():
-    from network import LTE
-    return LTE().imei()
