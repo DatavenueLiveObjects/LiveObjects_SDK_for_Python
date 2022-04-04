@@ -16,22 +16,22 @@ MESSAGE_RATE = 5
 
 # Define command function with arguments handling
 def foo(args={}):
-    lo.outputDebug(LiveObjects.INFO, "Called function foo with args", json.dumps(args))
+    lo.output_debug(LiveObjects.INFO, "Called function foo with args", json.dumps(args))
     counter = 0
     for i in range(args["repetitions"]):
         print("Repetition nr " + str(i))
         counter += 1
-    return {"Repeated": str(counter) + " times"}
+    return {"Repeated": str(counter) + " times."}
 
 
 # Main program
-lo.addCommand("foo", foo)   # Add command to LiveObjects: name - function
+lo.add_command("foo", foo)  # Add command to LiveObjects: name - function
 lo.connect()                # Connect to LiveObjects
 last = uptime = time.time()
 
 while True:
     if time.time() >= last + MESSAGE_RATE:
-        lo.addToPayload("uptime", int(time.time() - uptime))        # Add value to payload: name - value
-        lo.sendData()       # Sending data to cloud
+        lo.add_to_payload("uptime", int(time.time() - uptime))  # Add value to payload: name - value
+        lo.send_data()  # Sending data to cloud
         last = time.time()
         lo.loop()           # Check for incoming messages and if connection is still active

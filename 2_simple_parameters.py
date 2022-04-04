@@ -12,14 +12,14 @@ lo = LiveObjects.Connection()
 
 # Main program
 # Available types:  INT, BINARY, STRING, FLOAT
-lo.addParameter("messageRate", 5, LiveObjects.INT)		# Add parameter: Name - Value - Type
+lo.add_parameter("message_rate", 5, LiveObjects.INT)  # Add parameter: Name - Value - Type
 
 lo.connect() 	                                        # Connect to LiveObjects
 last = uptime = time.time()
 
 while True:
-    if time.time() >= last + lo.getParameter("messageRate"):		# Get the parameter using its name
-        lo.addToPayload("uptime", int(time.time() - uptime))		# Add value to payload: name - value
-        lo.sendData()		# Sending data to cloud
+    if time.time() >= last + lo.get_parameter("message_rate"):		# Get the parameter using its name
+        lo.add_to_payload("uptime", int(time.time() - uptime))  # Add value to payload: name - value
+        lo.send_data()  # Sending data to cloud
         last = time.time()
         lo.loop()		    # Check for incoming messages and if connection is still active
