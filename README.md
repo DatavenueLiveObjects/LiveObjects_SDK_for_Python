@@ -225,8 +225,8 @@ Basic fields meaning:
 
 If other specific fields are necessary you need to define them.
 You need to override specific methods - e.g. `connect` which is depended on type of board. 
-All specific functions are placed at the end of `hal.py`. 
-If your board needs function supporting its equipment you need to put it in this place.   
+All specific functions are placed in `services.py`. 
+If your board needs function supporting its equipment you need to put it in this file.   
 
 
 # Installation guide for uPython #
@@ -246,9 +246,9 @@ change **\<PIN\>** and **\<APN\>** suitable to your SIM card.
 
 2. Copy files into device
 ```Shell
->ampy -pCOMXX put umqttrobust.py 
->ampy -pCOMXX put simple.py   
->ampy -pCOMXX put LiveObjects // It will copy directory with its content 
+> ampy -pCOMXX put umqttrobust.py 
+> ampy -pCOMXX put simple.py   
+> ampy -pCOMXX put LiveObjects // It will copy directory with its content 
 ```
 3. Prepare your script and save it as `main.py` then copy file into device. 
 You can use one of example ones (`1_send_data.py`, ...) renaming it to `main.py` 
@@ -266,14 +266,14 @@ You can use one of example ones (`1_send_data.py`, ...) renaming it to `main.py`
 
 After all steps content of the device should look like below:
 ```Shell
->ampy -pCOMXX ls
+> ampy -pCOMXX ls
 /LiveObjects
 /boot.py
 /main.py
 /umqttrobust.py
 /simple.py
 
->ampy -pCOMXX ls LiveObjects
+> ampy -pCOMXX ls LiveObjects
 /LiveObjects/Connection.py
 /LiveObjects/__init__.py
 /LiveObjects/hal.py

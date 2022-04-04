@@ -6,6 +6,7 @@
 
 import time
 
+
 def use_existing_network_connection():
     print('Using existing network connection')
 
