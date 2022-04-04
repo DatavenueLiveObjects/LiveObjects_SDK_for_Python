@@ -5,6 +5,7 @@
 # license which can be found in the file 'LICENSE.md' in this package distribution
 
 import time
+import sys
 
 
 def use_existing_network_connection():
@@ -16,18 +17,30 @@ def get_mac():
     return ''.join(['{:02x}'.format((uuid.getnode() >> ele) & 0xff) for ele in range(0, 8*6, 8)][::-1]).upper()
 
 
+CONN_TIMEOUT = 20
+
+
 def wifi_connect(ssid, password):
     from network import WLAN, STA_IF
 
     sta_if = WLAN(STA_IF)
     sta_if.active(True)
-    while not sta_if.isconnected():
+    start_time = time.time()
+    while True:
         print('Connecting to network...')
-        sta_if.connect(ssid, password)
-        if sta_if.isconnected():
-            break
-        time.sleep(2)
-    print('Network config:', sta_if.ifconfig())
+        try:
+            sta_if.connect(ssid, password)
+            time.sleep_ms(3000)
+            if sta_if.isconnected():
+                print("WiFi connected successfully.")
+                print('Network config:', sta_if.ifconfig())
+                break
+            elif time.time() - start_time > CONN_TIMEOUT:
+                print("[ERROR] Wi-Fi not connected. Stopped.")
+                sys.exit()
+        except OSError:
+            print("[ERROR] Wi-Fi not connected. Stopped.")
+            sys.exit()
 
 
 def get_esp_mac():
@@ -36,26 +49,23 @@ def get_esp_mac():
     return binascii.hexlify(WLAN().config('mac')).decode('ascii').upper()
 
 
-CONN_TIMEOUT = 20
-
-
 def pycom_wifi_connect(ssid, password, hostname):
     from network import WLAN
 
     wlan = WLAN(mode=WLAN.STA)
     wlan.hostname(hostname)
     start_time = time.time()
-    while 1:
+    while True:
         print("Trying to connect...")
         wlan.connect(ssid=ssid, auth=(WLAN.WPA2, password))
         time.sleep_ms(3000)
         if wlan.isconnected():
-            print("WiFi connected successfully")
+            print("WiFi connected successfully.")
             print('IPs:', wlan.ifconfig(), 'Channel:', wlan.channel())
             break
         elif time.time() - start_time > CONN_TIMEOUT:
-            print("WiFi not connected. Stopped.")
-            break
+            print("[ERROR] Wi-Fi not connected. Stopped.")
+            sys.exit()
 
 
 def get_pycom_mac():
