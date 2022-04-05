@@ -4,30 +4,29 @@
 # This software is distributed under the terms and conditions of the 'MIT'
 # license which can be found in the file 'LICENSE.md' in this package distribution
 
-import os
-import sys
 import time
-
 import LiveObjects
 
-#Create LiveObjects with parameters:  ClientID - Security - APIKEY
-lo = LiveObjects.Connection("PythonMQTT", LiveObjects.NONE, "<APIKEY>")
+# Create LiveObjects
+lo = LiveObjects.Connection()
 
-messageRate = 5
+MESSAGE_RATE = 5
 
-#Define command function
+
+# Define command function
 def foo(arg={}):
-    lo.outputDebug(LiveObjects.INFO,"Called function foo")
+    lo.output_debug(LiveObjects.INFO, "Called function foo")
     return {}
 
-#Main program
-lo.addCommand("foo",foo) #Add command to LiveObjects: name - function
-lo.connect() #Connect to LiveObjects
-last = time.time()
-uptime = time.time()
+
+# Main program
+lo.add_command("foo", foo)  # Add command to LiveObjects: name - function
+lo.connect()					# Connect to LiveObjects
+last = uptime = time.time()
+
 while True:
-	if time.time()>=last+messageRate:
-		lo.addToPayload("uptime", int(time.time() - uptime) ) #Add value to payload: name - value
-		lo.sendData() #Sending data to cloud
-		lo.loop() #Check for incoming messages and if connection is still active
-		last = time.time()
+    if time.time() >= last + MESSAGE_RATE:
+        lo.add_to_payload("uptime", int(time.time() - uptime))  # Add value to payload: name - value
+        lo.send_data()  # Sending data to cloud
+        last = time.time()
+        lo.loop()			    # Check for incoming messages and if connection is still active

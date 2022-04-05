@@ -5,14 +5,14 @@ setup(
 
     name='LiveObjects',
     url='https://github.com/DatavenueLiveObjects/LiveObjects_SDK_for_Python',
-    author='Kacper Sawicki, Krzysztof Krześlak',
+    author='Kacper Sawicki, Krzysztof Krześlak, Tomasz Malek',
     #author_email='',
 
     packages=['LiveObjects'],
     include_package_data=True,
     install_requires=['paho-mqtt'],
 
-    version='1.0.0',
+    version='2.0.0',
     license='MIT',
 
 
