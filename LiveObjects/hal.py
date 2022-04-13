@@ -76,7 +76,7 @@ class LoPy(BoardsInterface):
 
     def get_client_id(self):
         from LiveObjects.services import get_pycom_mac
-        return self.get_lang_str() + 'MQTT_' + get_pycom_mac()
+        return self.get_lang_str() + ':' + get_pycom_mac()
 
 
 class GPy(BoardsInterface):
@@ -108,10 +108,10 @@ class GPy(BoardsInterface):
     def get_client_id(self):
         if self._net_type == BoardsInterface.WIFI:
             from LiveObjects.services import get_pycom_mac
-            return self.get_lang_str() + 'MQTT_' + get_pycom_mac()
+            return self.get_lang_str() + ':' + get_pycom_mac()
         elif self._net_type == BoardsInterface.LTE:
             from LiveObjects.services import get_pycom_imei
-            return self.get_lang_str() + 'MQTT_' + get_pycom_imei()
+            return self.get_lang_str() + ':' + get_pycom_imei()
 
 
 class Esp8266(BoardsInterface):
@@ -132,7 +132,7 @@ class Esp8266(BoardsInterface):
 
     def get_client_id(self):
         from LiveObjects.services import get_esp_mac
-        return self.get_lang_str() + 'MQTT_' + get_esp_mac()
+        return self.get_lang_str() + ':' + get_esp_mac()
 
 
 class Win32(BoardsInterface):
@@ -161,7 +161,7 @@ class Win32(BoardsInterface):
 
     def get_client_id(self):
         from LiveObjects.services import get_mac
-        return self.get_lang_str() + 'MQTT_' + get_mac()
+        return self.get_lang_str() + ':' + get_mac()
 
 
 class Esp32(BoardsInterface):
@@ -182,7 +182,7 @@ class Esp32(BoardsInterface):
 
     def get_client_id(self):
         from LiveObjects.services import get_esp_mac
-        return self.get_lang_str() + 'MQTT_' + get_esp_mac()
+        return self.get_lang_str() + ':' + get_esp_mac()
 
 
 class Linux(BoardsInterface):
@@ -207,7 +207,7 @@ class Linux(BoardsInterface):
 
     def get_client_id(self):
         from LiveObjects.services import get_mac
-        return self.get_lang_str() + 'MQTT_' + get_mac()
+        return self.get_lang_str() + ':' + get_mac()
 
 
 class BoardsFactory:
