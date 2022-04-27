@@ -29,8 +29,8 @@ class BoardsInterface:
         pass
 
     def get_lang_str(self):
-        lang_dict = {BoardsInterface.PYTHON: 'Python',
-                     BoardsInterface.MICROPYTHON: 'microPython'}
+        lang_dict = {BoardsInterface.PYTHON: 'urn:lo:nsid:Python',
+                     BoardsInterface.MICROPYTHON: 'urn:lo:nsid:microPython'}
         return lang_dict[self._lang_id]
 
     def get_lang_id(self):
