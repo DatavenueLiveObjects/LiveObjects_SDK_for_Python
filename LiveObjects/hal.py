@@ -210,10 +210,24 @@ class Linux(BoardsInterface):
         return self.get_lang_str() + ':' + get_mac()
 
 
+class RaspberryPi(Linux):
+    pass
+
+
+def is_raspberrypi():
+    try:
+        with open('/proc/device-tree/model') as f:
+            return f.read().startswith('Raspberry')
+    except FileNotFoundError:
+        return False
+
+
 class BoardsFactory:
 
     def __new__(cls, net_type):
         s = sys.platform
         sn = s[0].upper() + s[1:]   # capitalize first letter
+        if sn == 'Linux':
+            sn = 'RaspberryPi' if is_raspberrypi() else 'Linux'
         board = eval(sn)(net_type)  # instance of board w/ net type: WiFi, LTE, etc.
         return board
