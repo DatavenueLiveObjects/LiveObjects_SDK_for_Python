@@ -13,6 +13,7 @@ import adafruit_vl6180x
 try:
     import board
 except NotImplementedError:     # if no I2C device
+    print("No GPIO present.")
     sys.exit()
 
 # Create I2C bus
