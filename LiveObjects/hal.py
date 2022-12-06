@@ -231,3 +231,30 @@ class BoardsFactory:
             sn = 'RaspberryPi' if is_raspberrypi() else 'Linux'
         board = eval(sn)(net_type)  # instance of board w/ net type: WiFi, LTE, etc.
         return board
+
+
+class SensorVL6180X:
+    def __new__(cls):
+        try:  # Python@RPi
+            import busio
+            import adafruit_vl6180x
+            import board
+            # Create I2C bus
+            i2c = busio.I2C(board.SCL, board.SDA)
+            # Create sensor instance.
+            return adafruit_vl6180x.VL6180X(i2c)
+            # You can add an offset to distance measurements here (e.g. calibration)
+            # Swapping for the following would add a +10 millimeter offset to measurements:
+            # sensor = adafruit_vl6180x.VL6180X(i2c, offset=10)
+        except ImportError:  # microPython
+            import machine
+            import vl6180x
+            # Create I2C bus @8266
+            i2c = machine.I2C(scl=machine.Pin(5), sda=machine.Pin(4), freq=100000)
+            # Create I2C bus @ESP32
+            # i2c = machine.I2C(scl=machine.Pin(22), sda=machine.Pin(21), freq=100000)
+            # Create sensor instance.
+            return vl6180x.Sensor(i2c, address=0x29)
+        except NotImplementedError:  # if no I2C device
+            print("No GPIO present.")
+            sys.exit()
