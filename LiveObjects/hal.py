@@ -247,14 +247,28 @@ class SensorVL6180X:
             # Swapping for the following would add a +10 millimeter offset to measurements:
             # sensor = adafruit_vl6180x.VL6180X(i2c, offset=10)
         except ImportError:  # microPython
-            import machine
             import vl6180x
-            # Create I2C bus @8266
-            i2c = machine.I2C(scl=machine.Pin(5), sda=machine.Pin(4), freq=100000)
-            # Create I2C bus @ESP32
-            # i2c = machine.I2C(scl=machine.Pin(22), sda=machine.Pin(21), freq=100000)
-            # Create sensor instance.
+            i2c = get_i2c()
             return vl6180x.Sensor(i2c, address=0x29)
         except NotImplementedError:  # if no I2C device
             print("No GPIO present.")
             sys.exit()
+
+
+MAX_DEV_NB = 20
+
+
+def get_i2c():
+    import machine
+    typical_gpio = ([22, 23], [5, 4], [22, 21])
+    for gpio in typical_gpio:
+        scl, sda = gpio
+        i2c = None
+        try:
+            i2c = machine.SoftI2C(scl=machine.Pin(scl), sda=machine.Pin(sda), freq=100000)
+            if i2c.scan() and len(i2c.scan()) < MAX_DEV_NB:
+                return i2c
+        except:
+            pass
+        del i2c
+    raise RuntimeError("No I2C devices found. Check I2C lines.")
