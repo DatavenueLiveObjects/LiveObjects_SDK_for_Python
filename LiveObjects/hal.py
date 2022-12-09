@@ -246,7 +246,7 @@ def get_i2c():
             i2c = machine.SoftI2C(scl=machine.Pin(scl), sda=machine.Pin(sda), freq=100000)
             if i2c.scan() and len(i2c.scan()) < MAX_DEV_NB:
                 return i2c
-        except ValueError:
+        except ValueError:      # next sda, scl
             pass
         except AttributeError:  # Pycom MicroPython 1.20.2.r6 [v1.11-c5a0a97] on 2021-10-28
             i2c = machine.I2C(0)
