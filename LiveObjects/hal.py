@@ -265,87 +265,9 @@ class SensorVL6180X:
             return adafruit_vl6180x.VL6180X(i2c)
 
         except ImportError:  # microPython
-            import vl6180x
-
-            class ModSensor(vl6180x.Sensor):
-                def myRead16(self, register, nb_bytes=1):
-                    value = int.from_bytes(
-                        self.i2c.readfrom_mem(self._address, register, nb_bytes, addrsize=16),
-                        'big'
-                    )
-                    return value & 0xFFFF
-
-                def read_lux(self, gain):
-                    """Read the lux (light value) from the sensor and return it.  Must
-                    specify the gain value to use for the lux reading:
-
-                    =================  =====
-                         Setting       Value
-                    =================  =====
-                    ``ALS_GAIN_1``     1x
-                    ``ALS_GAIN_1_25``  1.25x
-                    ``ALS_GAIN_1_67``  1.67x
-                    ``ALS_GAIN_2_5``   2.5x
-                    ``ALS_GAIN_5``     5x
-                    ``ALS_GAIN_10``    10x
-                    ``ALS_GAIN_20``    20x
-                    ``ALS_GAIN_40``    40x
-                    =================  =====
-
-                    :param int gain: The gain value to use
-
-                    """
-
-                    reg = self.myRead16(0x0014)
-                    reg &= ~0x38
-                    reg |= 0x4 << 3  # IRQ on ALS ready
-                    self.myWrite16(0x0014, reg)
-                    # 100 ms integration period
-                    self.myWrite16(0x0040, 0)
-                    self.myWrite16(0x0041, 100)
-                    # analog gain
-                    gain = min(gain, 0x07)
-                    self.myWrite16(0x003F, 0x40 | gain)
-                    # start ALS
-                    self.myWrite16(0x0038, 1)
-                    # Poll until "New Sample Ready threshold event" is set
-                    while (
-                            (self.myRead16(0x004F) >> 3) & 0x7
-                    ) != 4:
-                        pass
-                    # read lux!
-                    lux = self.myRead16(0x0050, 2)
-                    # clear interrupt
-                    self.myWrite16(0x0015, 0x07)
-                    lux *= 0.32  # calibrated count/lux
-
-                    if gain == 0x06:  # ALS_GAIN_1:
-                        pass
-                    elif gain == 0x05:  # ALS_GAIN_1_25:
-                        lux /= 1.25
-                    elif gain == 0x04:  # ALS_GAIN_1_67:
-                        lux /= 1.67
-                    elif gain == 0x03:  # ALS_GAIN_2_5:
-                        lux /= 2.5
-                    elif gain == 0x02:  # ALS_GAIN_5:
-                        lux /= 5
-                    elif gain == 0x01:  # ALS_GAIN_10:
-                        lux /= 10
-                    elif gain == 0x00:  # ALS_GAIN_20:
-                        lux /= 20
-                    elif gain == 0x07:  # ALS_GAIN_40:
-                        lux /= 40
-                    lux *= 100
-                    lux /= 100  # integration time in ms
-                    return lux
-
-                @property
-                def range(self):
-                    range_ = super().range()
-                    return range_
-
+            import vl6180x_micro
             i2c = get_i2c()
-            return ModSensor(i2c, address=0x29)
+            return vl6180x_micro.Sensor(i2c, address=0x29)
 
         except NotImplementedError:  # if no I2C device
             print("No GPIO present.")
