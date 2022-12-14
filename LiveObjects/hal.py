@@ -252,7 +252,7 @@ def get_i2c():
             i2c = machine.I2C(0)
             return i2c
         del i2c
-    raise RuntimeError("No I2C devices found. Check I2C lines.")
+    raise RuntimeError("No I2C devices found. Check SDA and SCL lines and add respective GPIO to 'typical_gpio'.")
 
 
 class SensorVL6180X:
