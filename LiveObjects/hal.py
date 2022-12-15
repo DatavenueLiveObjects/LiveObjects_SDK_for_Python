@@ -223,7 +223,6 @@ def is_raspberrypi():
 
 
 class BoardsFactory:
-
     def __new__(cls, net_type):
         s = sys.platform
         sn = s[0].upper() + s[1:]   # capitalize first letter
@@ -267,7 +266,7 @@ class SensorVL6180X:
         except ImportError:  # microPython
             import vl6180x_micro
             i2c = get_i2c()
-            return vl6180x_micro.Sensor(i2c, address=0x29)
+            return vl6180x_micro.Sensor(i2c)
 
         except NotImplementedError:  # if no I2C device
             print("No GPIO present.")

@@ -21,7 +21,7 @@ from machine import I2C
 
 class Sensor:
     """
-    VL6180X sensor measuring distance and ambient light
+    Micropython library for VL6180X sensor measuring distance and ambient light
     """
     def __init__(self, i2c, address=0x29):
         self.i2c = i2c
@@ -44,7 +44,6 @@ class Sensor:
             raise RuntimeError("Failure reset")
 
         # Recommended setup from the datasheet
-     
         self.i2c_write(0x0207, 0x01)
         self.i2c_write(0x0208, 0x01)
         self.i2c_write(0x0096, 0x00)
@@ -98,7 +97,7 @@ class Sensor:
         # Additional settings defaults from community
         self.i2c_write(0x001C, 0x32)  # Max convergence time
         self.i2c_write(0x002D, 0x10 | 0x01)  # Range check enables
-        self.i2c_write(0x0022, 0x7B)  # Eraly coinvergence estimate
+        self.i2c_write(0x0022, 0x7B)  # Early convergence estimate
         self.i2c_write(0x0120, 0x01)  # Firmware result scaler
 
     def _range(self):
