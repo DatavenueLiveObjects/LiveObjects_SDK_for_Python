@@ -340,5 +340,48 @@ Plug-in supports code development, its upload to the board and communication wit
 
 ## VL6180X Sensor use-case ##
 
+Sensor described in this [section](#vl6180x-sensor-use-case) can be used on boards supporting microPython.
+
+### Prerequisites ###
+
+#### Wiring ####
+You need to connect I<sup>2</sup>C interface (SCL & SDA) and power lines on the board with corresponding pins on the sensor.
+You need to be aware that **boards can use different GPIOs for I<sup>2</sup>C** purposes. Set of typical pairs is placed 
+in function `get_i2c()` in file `hal.py`. If your board uses other GPIO pins, you need to add them to the tuple `typical_gpio`. 
+```Python
+def get_i2c():
+    import machine
+    typical_gpio = ([22, 23], [5, 4], [22, 21])
+...
+```
+![ESP32](image/ESP32_VL6180X.jpg)
+
+#### How to use ####
+1. You need to upload additional library for VL6180X support (it is placed in `micropython` folder):
+```commandline
+> ampy -pCOMXX put vl6180x_micro.py
+``` 
+2. Copy `7_distance_and_light_sensor.py` as `main.py` and upload it into board. 
+
+After above operations you can see:
+```commandline
+> ampy -pCOMXX ls
+/LiveObjects
+/boot.py
+/main.py
+/umqttrobust.py
+/simple.py
+/vl6180x_micro.py
+
+> ampy -pCOMXX ls LiveObjects
+/LiveObjects/Connection.py
+/LiveObjects/__init__.py
+/LiveObjects/hal.py
+/LiveObjects/credentials.py
+/LiveObjects/services.py
+```
+3. Connect to device and check if it's working using PuTTY.
+
+
 ## Troubleshooting ##
 If you are getting 'MQTT exception: 5' check your api key
