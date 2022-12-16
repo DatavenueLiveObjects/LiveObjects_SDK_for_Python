@@ -1,5 +1,5 @@
 # Prototype with Orange using Live Objects
-### Discover Orange  [**Live Objects**](https://liveobjects.orange-business.com) using dedicated SDK for **Python and uPython compatible** boards and systems.
+### Discover Orange  [**Live Objects**](https://liveobjects.orange-business.com) using dedicated SDK for **Python 3 and uPython compatible** boards and systems.
 
 This code wraps all the functions necessary to make your object work with Live Objects.
 
@@ -236,12 +236,55 @@ You need to override specific methods - e.g. `connect` which is depended on type
 All specific functions are placed in `services.py`. 
 If your board needs function supporting its equipment you need to put it in this file.   
 
+## VL6180X Sensor use-case ##
+
+We can connect sensor using I<sup>2</sup>C to board supporting Python like **Raspberry Pi**. 
+
+The [VL6180X](https://www.st.com/en/imaging-and-photonics-solutions/vl6180x.html) is the latest product based on ST’s patented FlightSense™technology. 
+This is a ground-breaking technology allowing absolute distance to be measured independent of target reflectance. 
+Instead of estimating the distance by measuring the amount of light reflected back from the object (which is significantly influenced by color and surface), 
+the VL6180X precisely measures the time the light takes to travel to the nearest object and reflect back to the sensor (Time-of-Flight).
+Description from st.com.
+
+### Prerequisites ###
+
+#### Enabling I<sup>2</sup>C ####
+Enable (if needed) **I<sup>2</sup>C** interface on your Raspberry Pi using terminal and command:
+```bash
+sudo raspi-config
+```
+and selecting: **3 Interface Options** -> **P5 I2C** -> **\<Yes\>**
+
+![I2C_Enabling](image/enable_I2C.png)
+
+#### Wiring ####
+![Wiring](https://www.raspberrypi-spy.co.uk/wp-content/uploads/2012/06/Raspberry-Pi-GPIO-Header-with-Photo-768x512.png "Mapping")
+
+<br>
+
+Example of development module using VL6180X you can find [here](https://kamami.pl/en/kamod-kamami-peripheral-modules/559362-kamodvl6180x-a-module-with-distance-gesture-and-als-sensor.html). Below diagram shows how to connect it to Raspberry Pi.
+
+![Schematics](image/RPi_VL6180X.png "Schematics")
+
+#### Adding VL6180X Python module ####
+Necessary module by [Adafruit](https://learn.adafruit.com/adafruit-vl6180x-time-of-flight-micro-lidar-distance-sensor-breakout/python-circuitpython) can be installed using `pip` 
+```bash
+pip3 install adafruit-circuitpython-vl6180x
+```
+
+#### How to use ####
+To run you need to use below command:
+```bash
+python3 7_distance_and_light_sensor.py
+```
+
+---
 
 # Installation guide for uPython #
 ## Example for ESP32 / ESP8266 ##
 ### Requirements ###
 1. [ampy](https://learn.adafruit.com/micropython-basics-load-files-and-run-code/install-ampy)
-2. [umqttsimple, umqttrobust and ssl](https://github.com/micropython/micropython-lib)
+2. [umqttsimple, umqttrobust and ssl](https://github.com/micropython/micropython-lib) (for your convenience they are included in `micropython` folder)
 3. [PuTTY](https://www.putty.org/) (for Windows)
 
 ### Installation steps ###
@@ -263,6 +306,7 @@ You can use one of example ones (`1_send_data.py`, ...) renaming it to `main.py`
 ```Shell
 > ampy -pCOMXX put main.py
 ```
+
 
 4. Connect to device and check if it's working using PuTTY
     
@@ -293,6 +337,8 @@ After all steps content of the device should look like below:
 
 You can do the steps as above but better is to use [Pymakr plug-in](https://pycom.io/products/supported-networks/pymakr/) for **Visual Studio Code** or **Atom** delivered by [Pycom](https://pycom.io/). 
 Plug-in supports code development, its upload to the board and communication with board. 
+
+## VL6180X Sensor use-case ##
 
 ## Troubleshooting ##
 If you are getting 'MQTT exception: 5' check your api key
