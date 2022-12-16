@@ -110,7 +110,7 @@ class Sensor:
     def range(self):
         return self._read_range_single()
 
-    def read_lux(self, gain=0x06):
+    def amb_light(self, gain=0x06):
         """Read the lux (light value) from the sensor and return it.  Must
         specify the gain value to use for the lux reading:
 

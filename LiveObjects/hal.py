@@ -260,8 +260,14 @@ class SensorVL6180X:
             import busio
             import adafruit_vl6180x
             import board
+
+            class VL6180X(adafruit_vl6180x.VL6180X):
+                def amb_light(self):
+                    """Implementing default gain"""
+                    return self.read_lux(gain=0x06)     # ALS_GAIN_1
+
             i2c = busio.I2C(board.SCL, board.SDA)
-            return adafruit_vl6180x.VL6180X(i2c)
+            return VL6180X(i2c)
 
         except ImportError:  # microPython
             import vl6180x_micro
