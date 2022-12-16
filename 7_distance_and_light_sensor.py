@@ -21,6 +21,6 @@ while True:
     if (time.time()) >= last + MESSAGE_RATE:
         lo.add_to_payload("distance", sensor.range)
         lo.add_to_payload("ambient_light", sensor.amb_light())
-        lo.send_data()  # Sending data to cloud
+        lo.send_data()                  # Sending data to cloud
         last = time.time()
         lo.loop() 						# Check for incoming messages and if connection is still active
