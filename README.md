@@ -354,6 +354,10 @@ def get_i2c():
     typical_gpio = ([22, 23], [5, 4], [22, 21])
 ...
 ```
+![ESP32_sch](image/ESP32_VL6180X_sch.png)
+
+Example of wiring ESP32 board with GPIO22 and GPIO21 (_source: https://randomnerdtutorials.com/esp32-pinout-reference-gpios/_)
+
 ![ESP32](image/ESP32_VL6180X.jpg)
 
 #### How to use ####
