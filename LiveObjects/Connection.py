@@ -212,6 +212,7 @@ class Connection:
         return 0
 
     def add_to_payload(self, name, val):
+        self.add_model("Orange")
         self.__payload[self.__value][name] = val
     
     def set_object_as_payload(self, val):
