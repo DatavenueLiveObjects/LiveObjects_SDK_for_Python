@@ -237,7 +237,7 @@ MAX_DEV_NB = 20
 
 def get_i2c():
     import machine
-    typical_gpio = ([22, 23], [5, 4], [22, 21])
+    typical_gpio = ([22, 23], [5, 4], [22, 21], [23, 18])
     for gpio in typical_gpio:
         scl, sda = gpio
         i2c = None
