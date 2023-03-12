@@ -1,5 +1,5 @@
 # Prototype with Orange using Live Objects
-### Discover Orange  [**Live Objects**](https://liveobjects.orange-business.com) using dedicated SDK for **Python and uPython compatible** boards and systems.
+### Discover Orange  [**Live Objects**](https://liveobjects.orange-business.com) using dedicated SDK for **Python 3 and uPython compatible** boards and systems.
 
 This code wraps all the functions necessary to make your object work with Live Objects.
 
@@ -23,7 +23,7 @@ Code uses MQTT connection to exchange data with Live objects under the hood to k
 This code needs a few libraries to run:
 - Python needs [paho-mqtt](https://pypi.org/project/paho-mqtt/)
     - Python for Windows needs [python-certifi-win32](https://pypi.org/project/python-certifi-win32/)
-- uPython needs [umqttsimple, umqttrobust and ssl](https://github.com/micropython/micropython-lib)
+- uPython needs [umqttsimple](https://github.com/micropython/micropython-lib/blob/master/micropython/umqtt.simple/umqtt/simple.py) and [umqttrobust](https://github.com/micropython/micropython-lib/blob/master/micropython/umqtt.robust/umqtt/robust.py)
 
 ## How to use ##
 
@@ -236,12 +236,55 @@ You need to override specific methods - e.g. `connect` which is depended on type
 All specific functions are placed in `services.py`. 
 If your board needs function supporting its equipment you need to put it in this file.   
 
+## VL6180X Sensor use-case ##
+
+We can connect sensor using I<sup>2</sup>C to board supporting Python like **Raspberry Pi**. 
+
+The [VL6180X](https://www.st.com/en/imaging-and-photonics-solutions/vl6180x.html) is the latest product based on ST’s patented FlightSense™technology. 
+This is a ground-breaking technology allowing absolute distance to be measured independent of target reflectance. 
+Instead of estimating the distance by measuring the amount of light reflected back from the object (which is significantly influenced by color and surface), 
+the VL6180X precisely measures the time the light takes to travel to the nearest object and reflect back to the sensor (Time-of-Flight).
+Description from st.com.
+
+### Prerequisites ###
+
+#### Enabling I<sup>2</sup>C ####
+Enable (if needed) **I<sup>2</sup>C** interface on your Raspberry Pi using terminal and command:
+```bash
+sudo raspi-config
+```
+and selecting: **3 Interface Options** -> **P5 I2C** -> **\<Yes\>**
+
+![I2C_Enabling](image/enable_I2C.png)
+
+#### Wiring ####
+![Wiring](https://www.raspberrypi-spy.co.uk/wp-content/uploads/2012/06/Raspberry-Pi-GPIO-Header-with-Photo-768x512.png "Mapping")
+
+<br>
+
+Example of development module using VL6180X you can find [here](https://kamami.pl/en/kamod-kamami-peripheral-modules/559362-kamodvl6180x-a-module-with-distance-gesture-and-als-sensor.html). Below diagram shows how to connect it to Raspberry Pi.
+
+![Schematics](image/RPi_VL6180X.png "Schematics")
+
+#### Adding VL6180X Python module ####
+Necessary module by [Adafruit](https://learn.adafruit.com/adafruit-vl6180x-time-of-flight-micro-lidar-distance-sensor-breakout/python-circuitpython) can be installed using `pip` 
+```bash
+pip3 install adafruit-circuitpython-vl6180x
+```
+
+#### How to use ####
+To run you need to use below command:
+```bash
+python3 7_distance_and_light_sensor.py
+```
+
+---
 
 # Installation guide for uPython #
 ## Example for ESP32 / ESP8266 ##
 ### Requirements ###
 1. [ampy](https://learn.adafruit.com/micropython-basics-load-files-and-run-code/install-ampy)
-2. [umqttsimple, umqttrobust and ssl](https://github.com/micropython/micropython-lib)
+2. [umqttsimple, umqttrobust and ssl](https://github.com/micropython/micropython-lib) (for your convenience they are included in `micropython` folder)
 3. [PuTTY](https://www.putty.org/) (for Windows)
 
 ### Installation steps ###
@@ -264,6 +307,7 @@ You can use one of example ones (`1_send_data.py`, ...) renaming it to `main.py`
 > ampy -pCOMXX put main.py
 ```
 
+
 4. Connect to device and check if it's working using PuTTY
     
     Ctrl + D soft resets device
@@ -274,25 +318,75 @@ You can use one of example ones (`1_send_data.py`, ...) renaming it to `main.py`
 
 After all steps content of the device should look like below:
 ```commandline
-> ampy -pCOMXX ls
+> ampy --port COMx ls
 /LiveObjects
 /boot.py
 /main.py
 /umqttrobust.py
 /simple.py
 
-> ampy -pCOMXX ls LiveObjects
+> ampy --port COMx ls LiveObjects
 /LiveObjects/Connection.py
 /LiveObjects/__init__.py
 /LiveObjects/hal.py
 /LiveObjects/credentials.py
 /LiveObjects/services.py
 ```
+where COMx means port on your computer (e.g. COM8) with connected microPython board. 
 
 ## Example for LoPy / GPy ##
 
 You can do the steps as above but better is to use [Pymakr plug-in](https://pycom.io/products/supported-networks/pymakr/) for **Visual Studio Code** or **Atom** delivered by [Pycom](https://pycom.io/). 
 Plug-in supports code development, its upload to the board and communication with board. 
+
+## VL6180X Sensor use-case ##
+
+Sensor described in this [section](#vl6180x-sensor-use-case) can be used on boards supporting microPython.
+
+### Prerequisites ###
+
+#### Wiring ####
+You need to connect I<sup>2</sup>C interface (SCL & SDA) and power lines on the board with corresponding pins on the sensor.
+You need to be aware that **boards can use different GPIOs for I<sup>2</sup>C** purposes. Set of typical pairs is placed 
+in function `get_i2c()` in file `hal.py`. If your board uses other GPIO pins, you need to add them to the tuple `typical_gpio`. 
+```Python
+def get_i2c():
+    import machine
+    typical_gpio = ([22, 23], [5, 4], [22, 21])
+...
+```
+![ESP32_sch](image/ESP32_VL6180X_sch.png)
+
+Example of wiring ESP32 board with GPIO22 and GPIO21 (_source: https://randomnerdtutorials.com/esp32-pinout-reference-gpios/_)
+
+![ESP32](image/ESP32_VL6180X.jpg)
+
+#### How to use ####
+1. You need to upload additional library for VL6180X support (it is placed in `micropython` folder):
+```commandline
+> ampy -pCOMXX put vl6180x_micro.py
+``` 
+2. Copy `7_distance_and_light_sensor.py` as `main.py` and upload it into board. 
+
+After above operations you can see:
+```commandline
+> ampy --port COMx ls
+/LiveObjects
+/boot.py
+/main.py
+/umqttrobust.py
+/simple.py
+/vl6180x_micro.py
+
+> ampy --port COMx ls LiveObjects
+/LiveObjects/Connection.py
+/LiveObjects/__init__.py
+/LiveObjects/hal.py
+/LiveObjects/credentials.py
+/LiveObjects/services.py
+```
+3. Connect to device and check if it's working using PuTTY.
+
 
 ## Troubleshooting ##
 If you are getting 'MQTT exception: 5' check your api key

@@ -210,10 +210,70 @@ class Linux(BoardsInterface):
         return self.get_lang_str() + ':' + get_mac()
 
 
-class BoardsFactory:
+class RaspberryPi(Linux):
+    pass
 
+
+def is_raspberrypi():
+    try:
+        with open('/proc/device-tree/model') as f:
+            return f.read().startswith('Raspberry')
+    except FileNotFoundError:
+        return False
+
+
+class BoardsFactory:
     def __new__(cls, net_type):
         s = sys.platform
         sn = s[0].upper() + s[1:]   # capitalize first letter
+        if sn == 'Linux':
+            sn = 'RaspberryPi' if is_raspberrypi() else 'Linux'
         board = eval(sn)(net_type)  # instance of board w/ net type: WiFi, LTE, etc.
         return board
+
+
+MAX_DEV_NB = 20
+
+
+def get_i2c():
+    import machine
+    typical_gpio = ([22, 23], [5, 4], [22, 21], [23, 18])
+    for gpio in typical_gpio:
+        scl, sda = gpio
+        i2c = None
+        try:                    # MicroPython 1.19.1 20220618-v1.19.1
+            i2c = machine.SoftI2C(scl=machine.Pin(scl), sda=machine.Pin(sda), freq=100000)
+            if i2c.scan() and len(i2c.scan()) < MAX_DEV_NB:
+                return i2c
+        except ValueError:      # next sda, scl
+            pass
+        except AttributeError:  # Pycom MicroPython 1.20.2.r6 [v1.11-c5a0a97] on 2021-10-28
+            i2c = machine.I2C(0)
+            return i2c
+        del i2c
+    raise RuntimeError("No I2C devices found. Check SDA and SCL lines and add respective GPIO to 'typical_gpio'.")
+
+
+class SensorVL6180X:
+    def __new__(cls):
+        try:                # Python@RPi
+            import busio
+            import adafruit_vl6180x
+            import board
+
+            class VL6180X(adafruit_vl6180x.VL6180X):
+                def amb_light(self):
+                    """Implementing default gain"""
+                    return self.read_lux(gain=0x06)     # ALS_GAIN_1
+
+            i2c = busio.I2C(board.SCL, board.SDA)
+            return VL6180X(i2c)
+
+        except ImportError:  # microPython
+            import vl6180x_micro
+            i2c = get_i2c()
+            return vl6180x_micro.Sensor(i2c)
+
+        except NotImplementedError:  # if no I2C device
+            print("No GPIO present.")
+            sys.exit()
