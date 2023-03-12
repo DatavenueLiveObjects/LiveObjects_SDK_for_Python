@@ -297,14 +297,14 @@ change **\<PIN\>** and **\<APN\>** suitable to your SIM card.
 
 2. Copy files into device
 ```commandline
-> ampy -pCOMXX put umqttrobust.py 
-> ampy -pCOMXX put simple.py   
-> ampy -pCOMXX put LiveObjects // It will copy directory with its content 
+> ampy --port COMx put umqttrobust.py 
+> ampy --port COMx put simple.py   
+> ampy --port COMx put LiveObjects // It will copy directory with its content 
 ```
 3. Prepare your script and save it as `main.py` then copy file into device. 
 You can use one of example ones (`1_send_data.py`, ...) renaming it to `main.py` 
 ```Shell
-> ampy -pCOMXX put main.py
+> ampy --port COMx put main.py
 ```
 
 
@@ -364,7 +364,7 @@ Example of wiring ESP32 board with GPIO22 and GPIO21 (_source: https://randomner
 #### How to use ####
 1. You need to upload additional library for VL6180X support (it is placed in `micropython` folder):
 ```commandline
-> ampy -pCOMXX put vl6180x_micro.py
+> ampy --port COMx put vl6180x_micro.py
 ``` 
 2. Copy `7_distance_and_light_sensor.py` as `main.py` and upload it into board. 
 
