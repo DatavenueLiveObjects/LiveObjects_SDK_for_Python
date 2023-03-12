@@ -23,7 +23,7 @@ Code uses MQTT connection to exchange data with Live objects under the hood to k
 This code needs a few libraries to run:
 - Python needs [paho-mqtt](https://pypi.org/project/paho-mqtt/)
     - Python for Windows needs [python-certifi-win32](https://pypi.org/project/python-certifi-win32/)
-- uPython needs [umqttsimple, umqttrobust and ssl](https://github.com/micropython/micropython-lib)
+- uPython needs [umqttsimple](https://github.com/micropython/micropython-lib/blob/master/micropython/umqtt.simple/umqtt/simple.py) and [umqttrobust](https://github.com/micropython/micropython-lib/blob/master/micropython/umqtt.robust/umqtt/robust.py)
 
 ## How to use ##
 
@@ -318,20 +318,21 @@ You can use one of example ones (`1_send_data.py`, ...) renaming it to `main.py`
 
 After all steps content of the device should look like below:
 ```commandline
-> ampy -pCOMXX ls
+> ampy --port COMx ls
 /LiveObjects
 /boot.py
 /main.py
 /umqttrobust.py
 /simple.py
 
-> ampy -pCOMXX ls LiveObjects
+> ampy --port COMx ls LiveObjects
 /LiveObjects/Connection.py
 /LiveObjects/__init__.py
 /LiveObjects/hal.py
 /LiveObjects/credentials.py
 /LiveObjects/services.py
 ```
+where COMx means port on your computer (e.g. COM8) with connected microPython board. 
 
 ## Example for LoPy / GPy ##
 
@@ -369,7 +370,7 @@ Example of wiring ESP32 board with GPIO22 and GPIO21 (_source: https://randomner
 
 After above operations you can see:
 ```commandline
-> ampy -pCOMXX ls
+> ampy --port COMx ls
 /LiveObjects
 /boot.py
 /main.py
@@ -377,7 +378,7 @@ After above operations you can see:
 /simple.py
 /vl6180x_micro.py
 
-> ampy -pCOMXX ls LiveObjects
+> ampy --port COMx ls LiveObjects
 /LiveObjects/Connection.py
 /LiveObjects/__init__.py
 /LiveObjects/hal.py
